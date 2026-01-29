@@ -1,0 +1,392 @@
+% =============================================================================
+% PRESENTACIÓN L-SOMA - Algoritmo de Localización de Residencias
+% =============================================================================
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% Tema y colores
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% Paquetes
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{eurosym}
+\usepackage{tikz}
+
+% Configuración de gráficos
+\graphicspath{{./}}
+
+% Colores personalizados
+\definecolor{lsomaBlue}{RGB}{41, 128, 185}
+\definecolor{lsomaGreen}{RGB}{39, 174, 96}
+\definecolor{lsomaOrange}{RGB}{230, 126, 34}
+\definecolor{lsomaRed}{RGB}{231, 76, 60}
+
+\setbeamercolor{title}{fg=white,bg=lsomaBlue}
+\setbeamercolor{frametitle}{fg=white,bg=lsomaBlue}
+
+% Información del documento
+\title[L-SOMA]{\textbf{L-SOMA}}
+\subtitle{Location-based System for Optimal Market Allocation\\[0.3cm]
+\small Identificación de Ubicaciones Óptimas para Residencias de Mayores}
+\author{Johan Manuel Orozco Mesa}
+\date{Enero 2026}
+\institute{Caso Práctico de IA}
+
+% =============================================================================
+\begin{document}
+% =============================================================================
+
+% -----------------------------------------------------------------------------
+% PORTADA
+% -----------------------------------------------------------------------------
+\begin{frame}
+\titlepage
+\end{frame}
+
+% -----------------------------------------------------------------------------
+% ÍNDICE
+% -----------------------------------------------------------------------------
+\begin{frame}{Contenido}
+\tableofcontents
+\end{frame}
+
+% =============================================================================
+\section{Contexto y Objetivo}
+% =============================================================================
+
+\begin{frame}{El Reto Estratégico}
+\begin{columns}
+\column{0.6\textwidth}
+\textbf{Objetivo del proyecto:}
+\begin{itemize}
+    \item Evaluar viabilidad de \textbf{1.000 nuevas residencias}
+    \item \textbf{100 camas} por residencia
+    \item Precio plaza: \textbf{2.100\euro{}/mes}
+    \item Ocupación objetivo: \textbf{85\%}
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{Basado en:}\\
+\textit{``Disparadores de Ingreso a Residencias Privadas''}
+
+\column{0.4\textwidth}
+\begin{block}{Pregunta clave}
+¿Dónde construir para maximizar ocupación y minimizar riesgo?
+\end{block}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Arquitectura del Algoritmo L-SOMA}
+\centering
+\includegraphics[width=0.85\textwidth]{arquitectura_lsoma.pdf}
+\end{frame}
+
+% =============================================================================
+\section{Metodología}
+% =============================================================================
+
+\begin{frame}{Pipeline de Análisis}
+\begin{enumerate}
+    \item \textbf{Definición del Target:} Vector Q (mujeres 80+, renta >30k\euro{})
+    \item \textbf{Matriz Demográfica P:} 32.910 secciones $\times$ 42 columnas
+    \item \textbf{Resonancia (JSD):} Divergencia Jensen-Shannon
+    \item \textbf{Clustering DBSCAN:} $\varepsilon$=1.5km geodésico
+    \item \textbf{Masa Crítica:} Umbral $\geq$85 camas
+    \item \textbf{Validación Competencia:} Google Places API
+\end{enumerate}
+
+\vspace{0.5cm}
+\begin{center}
+\textbf{32.910 secciones} $\rightarrow$ \textbf{135 clusters} $\rightarrow$ \textbf{21 viables (Prime)}
+\end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Divergencia Jensen-Shannon: Resonancia Demográfica}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Fórmula:}
+\[
+\mathcal{S}_i = 1 - JSD(\vec{P}_i \| \vec{Q})
+\]
+
+\textbf{Interpretación:}
+\begin{itemize}
+    \item $\mathcal{S}_i \approx 1$: Alta resonancia
+    \item $\mathcal{S}_i \approx 0$: Baja resonancia
+\end{itemize}
+
+\column{0.5\textwidth}
+\includegraphics[width=\textwidth]{histograma_resonancia.pdf}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Matriz Demográfica P}
+\centering
+\includegraphics[width=0.75\textwidth]{matriz_p_heatmap.pdf}
+
+\vspace{0.3cm}
+\small 32.910 secciones $\times$ 42 columnas demográficas
+\end{frame}
+
+% =============================================================================
+\section{Resultados}
+% =============================================================================
+
+\begin{frame}{Clustering Espacial: Mapa de España}
+\centering
+\includegraphics[width=0.8\textwidth]{mapa_clusters_espana.pdf}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Top 10 Clusters por Potencia}
+\centering
+\includegraphics[width=0.85\textwidth]{barras_top10_clusters.pdf}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Escenarios de Viabilidad}
+\begin{table}
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Escenario (Cuota)} & \textbf{Clusters} & \textbf{Residencias} & \textbf{Gap} \\
+\midrule
+1,5\% (Muy Conservador) & 6 & 17 & -983 \\
+2,0\% (Conservador) & 12 & 29 & -971 \\
+3,0\% (Base) & 19 & 50 & -950 \\
+5,0\% (Agresivo) & 25 & 91 & -909 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.5cm}
+\begin{alertblock}{Conclusión}
+\textbf{Gap estructural:} El mercado español soporta máximo 64-359 residencias orgánicamente. Para 1.000 se requiere M\&A.
+\end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Análisis de Sensibilidad: Market Share}
+\centering
+\includegraphics[width=0.8\textwidth]{sensibilidad_share.pdf}
+\end{frame}
+
+% =============================================================================
+\section{Expansión Adaptativa}
+% =============================================================================
+
+\begin{frame}{Algoritmo de Expansión}
+\textbf{Objetivo:} Maximizar residencias relajando parámetros de forma controlada
+
+\vspace{0.3cm}
+\begin{table}
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Parámetro} & \textbf{Prime} & \textbf{Expandido} & \textbf{Riesgo} \\
+\midrule
+Percentil Score & 85 & 60 & Bajo \\
+Market Share & 3\% & 6\% & Medio \\
+Penalización Renta & 0,40 & 0,70 & Alto \\
+Camas Mínimas & 85 & 60 & Crítico \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\textbf{Resultado:} 64 $\rightarrow$ \textbf{359 residencias} (72 iteraciones)
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Convergencia del Algoritmo}
+\centering
+\includegraphics[width=0.85\textwidth]{expansion_convergencia.pdf}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Comparativa Prime vs Expandido}
+\centering
+\includegraphics[width=0.85\textwidth]{expansion_comparativa.pdf}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Mapa: Clusters Viables tras Expansión}
+\centering
+\includegraphics[width=0.85\textwidth]{expansion_mapa_clusters.pdf}
+\end{frame}
+
+% =============================================================================
+\section{Validación de Competencia}
+% =============================================================================
+
+\begin{frame}{Análisis de Competencia: Google Places API}
+\textbf{Metodología:}
+\begin{itemize}
+    \item Radio de búsqueda: 1.500m
+    \item Query: ``Residencia de ancianos OR Geriátrico''
+    \item Camas estimadas/competidor: 75 (media IMSERSO)
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Índice de Saturación:}
+\[
+I_{sat} = \frac{N_{competidores} \times 75}{Camas_{potenciales}}
+\]
+
+\vspace{0.3cm}
+\textbf{Clasificación:}
+\begin{itemize}
+    \item \textcolor{lsomaBlue}{\textbf{Blue Ocean:}} $I_{sat} < 0.20$
+    \item \textcolor{lsomaOrange}{\textbf{Batalla:}} $0.20 \leq I_{sat} \leq 1.0$
+    \item \textcolor{lsomaRed}{\textbf{Saturado:}} $I_{sat} > 1.0$
+\end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Distribución por Nivel de Competencia}
+\begin{columns}
+\column{0.55\textwidth}
+\centering
+\includegraphics[width=\textwidth]{competencia_distribucion.pdf}
+
+\column{0.45\textwidth}
+\begin{table}
+\centering
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Tipo} & \textbf{N} & \textbf{\%} \\
+\midrule
+\textcolor{lsomaBlue}{Blue Ocean} & 3 & 3,3\% \\
+\textcolor{lsomaOrange}{Batalla} & 13 & 14,3\% \\
+\textcolor{lsomaRed}{Saturado} & 75 & 82,4\% \\
+\midrule
+\textbf{Total} & 91 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Los 3 Blue Oceans Identificados}
+\begin{table}
+\centering
+\begin{tabular}{clccc}
+\toprule
+\textbf{Rank} & \textbf{Ubicación} & \textbf{Camas} & \textbf{Compet.} & \textbf{$I_{sat}$} \\
+\midrule
+1 & \textbf{Madrid Centro} & 7.274 & 7 & 0,077 \\
+2 & \textbf{Bilbao} & 2.114 & 4 & 0,151 \\
+3 & \textbf{Málaga Costa} & 419 & 1 & 0,191 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.5cm}
+\begin{block}{Nota Estratégica}
+\textbf{Madrid y Bilbao:} Alta barrera inmobiliaria. Oportunidad en reconversión de edificios o modelo High-End.\\
+\textbf{Málaga:} Menor barrera. Viable para modelo greenfield tradicional.
+\end{block}
+\end{frame}
+
+% =============================================================================
+\section{Conclusiones}
+% =============================================================================
+
+\begin{frame}{Hallazgos Principales}
+\begin{enumerate}
+    \item \textbf{Capacidad máxima:} 64-348 residencias (construcción orgánica)
+    
+    \item \textbf{Concentración metropolitana:} Top 5 clusters = 56\% de la potencia\\
+    (Madrid, Barcelona, Bilbao, Zaragoza, Valladolid)
+    
+    \item \textbf{Objetivo 1.000 inalcanzable:} Gap de 641 unidades $\rightarrow$ requiere M\&A
+    
+    \item \textbf{Punto óptimo:} Iteración 40 (348 residencias, calidad preservada)
+    
+    \item \textbf{82,4\% saturado:} Solo 3 clusters califican como Blue Ocean
+    
+    \item \textbf{Madrid Centro:} Mayor oportunidad ($I_{sat}$=0,077)
+\end{enumerate}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Recomendación Estratégica}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Construcción Orgánica:}
+\begin{itemize}
+    \item 64-100 residencias Prime
+    \item Foco: Madrid, Barcelona, Bilbao
+    \item Modelo greenfield: Málaga
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Expansión Moderada:}
+\begin{itemize}
+    \item Hasta 250 residencias adicionales
+    \item Relajar percentil/share
+    \item Preservar camas $\geq$85
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{M\&A para el Gap:}
+\begin{itemize}
+    \item 641 residencias restantes
+    \item Adquisición de operadores
+    \item Fuera del alcance L-SOMA
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{alertblock}{Total estimado}
+\textbf{350-400 residencias} mediante construcción orgánica + expansión
+\end{alertblock}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Limitaciones del Modelo}
+\begin{itemize}
+    \item \textbf{Horizonte estático:} Snapshot del censo 2021-2025. No proyecta envejecimiento futuro.
+    
+    \item \textbf{Incertidumbre en competencia:} API Google no captura 100\% de oferta. 75 camas/competidor es aproximación.
+    
+    \item \textbf{Proxy de burnout:} Asume mujeres 45-64 años son cuidadoras locales (ignora movilidad).
+    
+    \item \textbf{Market share hipotético:} 1,5-6\% sin validación empírica.
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{block}{Siguiente paso}
+Validación de campo en los 3 Blue Oceans identificados
+\end{block}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}
+\centering
+\vspace{2cm}
+{\Huge \textbf{¿Preguntas?}}
+
+\vspace{1cm}
+\textbf{L-SOMA}\\
+Location-based System for Optimal Market Allocation
+
+\vspace{1cm}
+{\small Johan Manuel Orozco Mesa | Enero 2026}
+\end{frame}
+
+% =============================================================================
+\end{document}

@@ -1,0 +1,1576 @@
+% =============================================================================
+% INFORME TÉCNICO: ALGORITMO L-SOMA
+% Sistema de Localización Estratégica de Residencias de Mayores en España
+% =============================================================================
+
+\documentclass[12pt,a4paper]{article}
+
+% --- PAQUETES ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{geometry}
+\usepackage[colorlinks=true, linkcolor=blue!70!black, citecolor=blue!70!black, urlcolor=blue!70!black]{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{braket} % Para notación de Dirac (\ket, \bra)
+\usepackage{eurosym} % Símbolo del euro
+\usepackage{tcolorbox} % Cajas coloreadas para conclusiones
+
+\geometry{margin=2.5cm}
+
+% Ajuste de headheight para fancyhdr
+\setlength{\headheight}{14.5pt}
+\addtolength{\topmargin}{-2.5pt}
+
+% Configuración de encabezados
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Algoritmo L-SOMA}
+\lhead{Caso Práctico IA}
+\rfoot{Página \thepage}
+
+% Configuración de código
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    language=Python,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    extendedchars=true,
+    literate=
+        {á}{{\'{a}}}1 {é}{{\'{e}}}1 {í}{{\'{i}}}1 {ó}{{\'{o}}}1 {ú}{{\'{u}}}1
+        {Á}{{\'{A}}}1 {É}{{\'{E}}}1 {Í}{{\'{I}}}1 {Ó}{{\'{O}}}1 {Ú}{{\'{U}}}1
+        {ñ}{{\~{n}}}1 {Ñ}{{\~{N}}}1
+}
+
+% Definiciones matemáticas
+\newtheorem{definition}{Definición}
+\newtheorem{theorem}{Teorema}
+
+% =============================================================================
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries Algoritmo L-SOMA\\[0.5cm]}
+    {\Large\itshape Sistema de Localización Óptima para\\Residencias de Mayores en España\\[2cm]}
+    
+    {\large Caso práctico: Desarrolla un algoritmo de IA de venta\\
+    Fundación Innovación Bankinter: Akademia\\[1.5cm]}
+    
+    \vfill
+    
+    {\Large\bfseries Johan Manuel Orozco Mesa\\[0.5cm]}
+    
+    %\begin{tabular}{ll}
+    %    María García López & Carlos Rodríguez Martín \\
+    %    Ana Fernández Ruiz & David Sánchez Pérez \\
+    %    Laura Martínez Díaz & Pablo Gómez Torres \\
+    %\end{tabular}
+    
+    \vfill
+    
+    {\large Enero 2026}
+    
+\end{titlepage}
+
+% --- ÍNDICE ---
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Resumen Ejecutivo}
+% =============================================================================
+
+El presente informe documenta el desarrollo del algoritmo \textbf{L-SOMA} (\textit{Location-based System for Optimal Market Allocation}), un sistema de soporte a la decisión diseñado para identificar las localizaciones óptimas para la apertura de residencias de mayores en España. El análisis se fundamenta en el estudio previo \textit{``Disparadores de Ingreso a Residencias Privadas''}, que identifica los factores clave de demanda.
+
+El objetivo del proyecto es evaluar la viabilidad de un plan de expansión de \textbf{1.000 nuevas residencias} de \textbf{100 camas} cada una, con un coste de plaza de \textbf{2.100\euro{} mensuales}, garantizando:
+
+\begin{itemize}
+    \item Una ocupación media del 85\% para asegurar el retorno de inversión.
+    \item Minimización del riesgo de morosidad mediante filtros de solvencia.
+    \item Identificación de ``océanos azules'' con alta demanda demográfica y baja competencia.
+\end{itemize}
+
+\subsection{Resultados Principales: Escenarios de Absorción}
+
+Tras aplicar el algoritmo sobre las 32.910 secciones censales, se ha calculado la capacidad de absorción del mercado. Para ello, se define la variable \textbf{Cuota de Mercado} como el porcentaje de la población objetivo (mujeres mayores de 80 años solventes) que efectivamente optaría por ingresar en nuestras residencias frente a alternativas públicas, competencia o cuidado domiciliario.
+
+Considerando que se trata de un nuevo operador en el mercado (entrante), se modelan cuatro escenarios de sensibilidad conservadores:
+
+\begin{table}[H]
+\centering
+\caption{Viabilidad del Plan de Expansión según Tasa de Captura\textsuperscript{*}}
+\label{tab:escenarios}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Escenario (Cuota)} & \textbf{Clusters Viables} & \textbf{Residencias} & \textbf{Gap vs 1.000} \\
+\midrule
+1,5\% (Muy Conservador) & 6 & 17 & -983 \\
+2,0\% (Conservador) & 12 & 29 & -971 \\
+3,0\% (Base) & 19 & 50 & -950 \\
+5,0\% (Agresivo) & 25 & 91 & -909 \\
+\bottomrule
+\end{tabular}
+\vspace{0.2cm}
+
+\footnotesize{\textsuperscript{*}Escenarios bajo restricciones de calidad ``Prime'' (Renta $>$30k\euro{}, Camas $\geq$85). El Modelo Expandido (Sección 7) relaja estos parámetros alcanzando 359 residencias.}
+\end{table}
+
+\textbf{Conclusión estratégica:} El mercado español soporta entre 27 y 117 residencias nuevas mediante construcción orgánica. Para alcanzar el objetivo de 1.000 unidades, es imperativa una estrategia complementaria de fusiones y adquisiciones (M\&A).
+
+% =============================================================================
+\section{Marco Teórico y Justificación Metodológica}
+% =============================================================================
+
+\subsection{Del Análisis Descriptivo al Espacio de Hilbert}
+
+El enfoque tradicional para localización de negocios se basa en estadísticas descriptivas simples (media de edad, densidad de población). Sin embargo, este enfoque pierde información estructural crítica.
+
+\begin{definition}[Pérdida de Información Escalar]
+Si describimos una población únicamente con su edad media (un escalar), estamos proyectando un sistema complejo en una sola dimensión. Ejemplo: un grupo de niños de 5 años y ancianos de 95 años tiene la misma media de 50 años que un grupo homogéneo de adultos de 50 años. Para un negocio de residencias, estos escenarios son opuestos.
+\end{definition}
+
+Para superar esta limitación, adoptamos un enfoque de \textbf{física de sistemas}, tratando cada sección censal como un \textbf{vector de estado} en un espacio de Hilbert $n$-dimensional.
+
+
+
+
+
+\begin{definition}[Vector de Estado y Normalización $L_1$]
+Sea $\vec{C}_i \in \mathbb{N}^{42}$ el vector de conteos absolutos (datos crudos) de la sección censal $i$, donde cada componente $n_{s,r}$ representa el número de personas del sexo $s$ y rango de edad $r$.
+
+La magnitud de $\vec{C}_i$ depende del tamaño poblacional de la sección, lo que introduce un sesgo de escala que impide comparaciones estructurales directas. Para resolver esto, definimos el \textbf{Vector de Estado Normalizado} $\ket{P_i}$ aplicando una proyección al símplex estándar de probabilidad (normalización $L_1$):
+
+\begin{equation}
+\ket{P_i} = \frac{\vec{C}_i}{\| \vec{C}_i \|_1} = \frac{1}{N_i} (n_{H,0\text{-}4}, \ldots, n_{M,100+})
+\end{equation}
+
+donde $N_i = \sum_{s,r} n_{s,r}$ es la población total de la sección. Esta operación transforma los conteos brutos en una Función de Masa de Probabilidad (PMF), garantizando la condición de cierre:
+\begin{equation}
+\braket{P_i | \mathbf{1}} = \sum_{s,r} p_{s,r} = 1
+\end{equation}
+De este modo, desacoplamos la ``forma'' de la pirámide demográfica (estructura) de su ``volumen'' (tamaño), permitiendo medir la distancia termodinámica entre poblaciones de magnitudes dispares.
+\end{definition}
+
+
+
+
+
+
+
+
+
+
+
+\subsection{El Vector Objetivo: La Pirámide Ideal}
+
+Basándonos en el estudio sociológico (ver Anexo A), definimos el vector objetivo $\ket{Q}$ que representa la distribución demográfica ``ideal'' para el negocio de residencias.
+
+
+
+\subsubsection{Parametrización del Vector Objetivo $\ket{Q}$}
+
+Dado que el estudio de referencia establece que la \textbf{edad media de ingreso se ha retrasado hasta los 82 años}, la distribución de pesos del vector $\ket{Q}$ no puede ser lineal. Debe modelarse como una curva que penalice las edades tempranas y maximice la señal en la ``Cuarta Edad''.
+
+Los pesos $w_{s,r}$ se han calibrado para satisfacer la restricción de edad media del estudio:
+
+\begin{enumerate}
+    \item \textbf{Peso de Continuidad (60-74 años) = 0,5:} Se asigna un valor reducido para capturar la \textbf{Tasa de Reposición}. Una zona con alta densidad de 85+ pero vacío en la franja 60-74 es un ``mercado en extinción''; este peso premia la sostenibilidad del flujo de clientes a medio plazo (horizonte 10 años).
+    \item \textbf{Peso Base (75-79 años) = 1:} Se establece como unidad de referencia. El ingreso en esta franja es bajo porque las familias aún intentan mantener el cuidado en el hogar.
+    \item \textbf{Peso Máximo (85+ años) = 5:} Para obtener una media de entrada de 82 años, la probabilidad de ingreso en el segmento 85+ debe ser significativamente superior (aprox. 5 veces) a la del segmento 75-79. Esto refleja la situación de ``fragilidad extrema'' e ``inmanejabilidad'' descrita en el informe.
+    \item \textbf{Factor de Soledad ($\gamma = 1,3$):} El estudio destaca que casi 2 millones de mayores viven solos y que la soledad es un factor crítico. Dado que demográficamente la soledad en la cuarta edad tiene mayor prevalencia femenina, aplicamos un factor de corrección de 1,3 a los segmentos femeninos para capturar este riesgo.
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\caption{Matriz de Pesos calibrada según Edad Media de Ingreso (82 años)}
+\label{tab:pesos}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Rango} & \textbf{Peso H ($w_H$)} & \textbf{Peso M ($w_M$)} & \textbf{Fundamento en el Estudio} \\
+\midrule
+60-74 & 0,50 & 0,65 & Demanda Latente (Sostenibilidad futura) \\
+75-79 & 1,00 & 1,30 & Resistencia familiar al ingreso \\
+80-84 & 4,00 & 5,20 & Entorno de la media (82 años) \\
+85+ & 5,00 & 6,50 & Situación ``inmanejable'' / Fragilidad \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\textbf{Nota sobre la Normalización:}
+La suma bruta de estos pesos ($W_{total} = \sum w_{s,r}$) no es unitaria. Para obtener el vector de estado físico $\ket{Q}$ que cumpla las condiciones de un espacio de probabilidad ($\sum Q = 1$), se aplica una normalización $L_1$ final:
+
+\begin{equation}
+\ket{Q} = \left( \frac{w_{H,0\text{-}4}}{W_{total}}, \ldots, \frac{w_{M,100+}}{W_{total}} \right)
+\end{equation}
+
+De esta forma, garantizamos que $\braket{Q|Q}_1 = 1$, permitiendo la comparación directa con los vectores de población $\ket{P_i}$.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Métrica de Resonancia: Divergencia de Jensen-Shannon}
+
+Para cuantificar la ``similitud'' entre una sección censal $\ket{P_i}$ y nuestro vector objetivo $\ket{Q}$, empleamos la \textbf{Divergencia de Jensen-Shannon (JSD)}.
+
+\begin{definition}[Divergencia de Jensen-Shannon]
+Sean $P$ y $Q$ dos distribuciones de probabilidad sobre el mismo espacio muestral. La divergencia JSD se define como:
+\begin{equation}
+JSD(P \| Q) = \frac{1}{2} D_{KL}(P \| M) + \frac{1}{2} D_{KL}(Q \| M)
+\end{equation}
+donde $M = \frac{1}{2}(P + Q)$ es la mezcla de ambas distribuciones, y $D_{KL}$ es la divergencia de Kullback-Leibler:
+\begin{equation}
+D_{KL}(P \| Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}
+\end{equation}
+\end{definition}
+
+\paragraph{Interpretación Física de la Divergencia KL:}
+La Divergencia de Kullback-Leibler, también conocida como \textbf{Entropía Relativa}, mide la cantidad de información perdida (en bits, si el logaritmo es base 2) cuando se utiliza la distribución $Q$ para aproximar la distribución verdadera $P$.
+En términos termodinámicos, cuantifica la ``sorpresa'' o el coste entrópico de asumir que una población sigue el patrón $Q$ cuando en realidad se comporta como $P$. Cabe destacar que $D_{KL}$ no es una distancia métrica real, ya que carece de simetría ($D_{KL}(P\|Q) \neq D_{KL}(Q\|P)$) y no satisface la desigualdad triangular, motivo por el cual recurrimos a la JSD para simetrizar la medición.
+
+
+
+\subsubsection{Propiedades de la JSD}
+
+La elección de JSD sobre otras métricas (distancia euclídea, divergencia KL) se justifica por:
+
+\begin{enumerate}
+    \item \textbf{Simetría:} $JSD(P \| Q) = JSD(Q \| P)$.
+    \item \textbf{Acotación:} $0 \leq JSD \leq 1$ (usando logaritmo base 2).
+    \item \textbf{Robustez:} No explota cuando $P(x) > 0$ y $Q(x) = 0$.
+    \item \textbf{Interpretación:} Mide la ``información compartida'' entre distribuciones.
+\end{enumerate}
+
+Definimos la \textbf{Resonancia Demográfica} como:
+\begin{equation}
+\mathcal{R}_i = 1 - JSD(P_i \| Q)
+\end{equation}
+
+Un valor de $\mathcal{R}_i$ cercano a 1 indica alta similitud con el perfil demográfico ideal; cercano a 0 indica disonancia total.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% =============================================================================
+\section{Fuentes de Datos y Tratamiento}
+% =============================================================================
+
+\subsection{Fuentes Primarias del INE}
+
+El proyecto utiliza exclusivamente datos públicos del Instituto Nacional de Estadística (INE):
+
+\begin{enumerate}
+    \item \textbf{Censo de Población 2021-2025:} Distribución por sexo y edad quinquenal para las 32.910 secciones censales de España.
+    
+    \item \textbf{Atlas de Distribución de Renta de los Hogares 2023:} Renta neta media por hogar a nivel de sección censal.
+    
+    \item \textbf{Cartografía Censal 2024:} Shapefiles con los polígonos georreferenciados de cada sección censal (CUSEC).
+\end{enumerate}
+
+\subsection{Proceso de Ingesta y Limpieza}
+
+\subsubsection{Fase 1: Extracción de Datos Demográficos}
+
+Los datos del censo se obtienen en formato CSV con separador tabulador, conteniendo las siguientes columnas:
+
+\begin{itemize}
+    \item \texttt{Secciones}: Código CUSEC + nombre descriptivo
+    \item \texttt{Sexo}: ``Hombres'', ``Mujeres'' o ``Total''
+    \item \texttt{Edad}: Rango quinquenal (``De 0 a 4 años'', etc.) o ``Todas las edades''
+    \item \texttt{Periodo}: Año de referencia
+    \item \texttt{Total}: Conteo de población
+\end{itemize}
+
+\textbf{Filtros aplicados:}
+\begin{enumerate}
+    \item Exclusión de filas con \texttt{Sexo = ``Total''} (evita duplicación de datos).
+    \item Exclusión de filas con \texttt{Edad = ``Todas las edades''} (agregados que duplicarían los rangos específicos).
+    \item Selección del año más reciente disponible (2025).
+\end{enumerate}
+
+\textbf{Transformación de formato:}
+El formato de edad del INE (``De 0 a 4 a\~nos'') se transforma al formato normalizado (``0-4'') mediante:
+\begin{lstlisting}
+df['Edad_Clean'] = (df['Edad']
+    .str.replace(' anios', '')
+    .str.replace('De ', '')
+    .str.replace(' a ', '-'))
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsubsection{Fase 2: Construcción de la Matriz P}
+
+La matriz de población $\mathbf{P}$ tiene dimensiones $32.910 \times 42$, donde cada fila es una sección censal y cada columna un bin edad-sexo (H\_0-4, H\_5-9, ..., M\_100+).
+
+Para convertir conteos absolutos a probabilidades:
+\begin{equation}
+p_{i,j} = \frac{n_{i,j}}{\sum_j n_{i,j}}
+\end{equation}
+
+donde $n_{i,j}$ es el conteo absoluto de la sección $i$ en el bin $j$.
+
+% --- Figura: Heatmap de Matriz P ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{matriz_p_heatmap.pdf}
+    \caption{Visualización de la Matriz P para una muestra de 100 secciones aleatorias. Cada fila representa una sección censal; cada columna un bin edad-sexo. Colores más intensos indican mayor concentración de población.}
+    \label{fig:matriz_p}
+\end{figure}
+
+\textbf{Interpretación de la Matriz:} La visualización revela una \textbf{dualidad estructural}. En los rangos centrales (adultos de $30\text{--}65$ años), se observa una marcada \textit{homogeneidad vertical} (bandas continuas naranjas/amarillas), indicando que la base poblacional es consistente en todo el territorio.
+
+Sin embargo, en el segmento objetivo ($M_{80+}$), esta uniformidad se rompe. Las bandas verticales se fragmentan en \textbf{patrones discretos e intermitentes}. No todas las secciones censales conservan la ``cola'' de la distribución demográfica con la misma intensidad. Esta \textit{variabilidad específica en la cuarta edad} ---donde algunas filas muestran alta densidad (amarillo) y sus vecinas nula (morado)--- es la que permite al algoritmo discriminar oportunidades de inversión frente al ruido de fondo general.
+
+
+
+
+
+\subsubsection{Fase 3: Integración de Datos Económicos}
+
+Los datos de renta se cruzan mediante el código CUSEC (primeros 10 dígitos de la columna \texttt{Secciones}):
+
+\begin{lstlisting}
+df_rank['CUSEC'] = df_rank['Seccion'].str.split(' ').str[0]
+df_final = pd.merge(df_rank, df_renta[['CUSEC', 'Renta_Hogar']], 
+                    on='CUSEC', how='left')
+\end{lstlisting}
+
+\textbf{Tratamiento de valores faltantes:} Las secciones sin dato de renta (aproximadamente 5\%) reciben un valor de 0, lo que las penaliza en el score final.
+
+\subsection{Auditoría de Calidad de Datos}
+
+Antes de proceder al análisis, se ejecuta una auditoría automática que verifica:
+
+\begin{enumerate}
+    \item \textbf{Estructura:} Las 42 columnas de la matriz P coinciden con el vector Q.
+    \item \textbf{Masa:} La población total representada está en el rango esperado (40-50 millones).
+    \item \textbf{Normalización:} Cada fila suma exactamente 1.0 ($\pm$ error de punto flotante).
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+% =============================================================================
+\section{Metodología: El Algoritmo L-SOMA}
+% =============================================================================
+
+\subsection{Arquitectura del Sistema}
+
+El algoritmo L-SOMA se estructura en cinco capas de procesamiento:
+
+% --- Figura: Arquitectura L-SOMA ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{arquitectura_lsoma.pdf}
+    \caption{Arquitectura del algoritmo L-SOMA.}
+    \label{fig:arquitectura}
+\end{figure}
+
+
+
+
+\subsection{Fase 1: Cálculo de Resonancia Demográfica}
+
+Para cada sección censal $i$, calculamos la distancia Jensen-Shannon respecto al vector objetivo:
+
+\begin{equation}
+d_i = JSD(P_i \| Q)
+\end{equation}
+
+La implementación utiliza \texttt{scipy.spatial.distance.jensenshannon}:
+
+\begin{lstlisting}
+from scipy.spatial.distance import jensenshannon
+distancias = np.apply_along_axis(
+    lambda row: jensenshannon(row, vector_Q), 
+    axis=1, arr=matriz_P)
+resonancias = 1.0 - distancias
+\end{lstlisting}
+
+% --- Figura: Histograma de Resonancias ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{histograma_resonancia.pdf}
+    \caption{Distribución de la Resonancia Demográfica $\mathcal{R}$ para las 32.910 secciones censales. La línea vertical indica el umbral del percentil 85.}
+    \label{fig:hist_resonancia}
+\end{figure}
+
+
+\textbf{Análisis de Selectividad:} El histograma muestra que la Resonancia Demográfica sigue una distribución cuasi-normal centrada en $\mu \approx 0,38$. Es crucial notar que ninguna sección alcanza el valor teórico de $1,0$; los mejores candidatos saturan en torno a $0,50$, lo que evidencia la complejidad del tejido social real frente al modelo ideal.
+
+\textbf{Criterio de Corte (Percentil 85):} Para optimizar los recursos computacionales y enfocar la inversión, establecemos un umbral de corte estricto en el percentil 85 ($R > 0,402$). Esto actúa como un filtro de calidad que descarta automáticamente el $85\%$ del territorio nacional, reduciendo el espacio de búsqueda de $32.910$ a las \textbf{4.937 secciones más prometedoras} antes de aplicar los criterios económicos. El umbral de 85 camas corresponde a la capacidad mínima considerada viable operativamente por los principales operadores del sector, superando en un 15\% la media nacional de 74,8 plazas/centro (IMSERSO, 2023).
+
+
+
+
+
+
+
+\subsection{Fase 2: Filtro Económico (Solvencia)}
+
+El modelo incorpora una función de transferencia no lineal $\Phi(r)$ que modula la resonancia demográfica según la viabilidad financiera de la zona. Se utiliza la Renta Neta Media por Hogar ($r$) como variable independiente.
+
+\begin{equation}
+\Phi_{econ}(r) = \begin{cases}
+0.4 & \text{si } r < 30.000\text{\euro{}} \\
+\frac{65.000}{r} & \text{si } r > 65.000\text{\euro{}} \\
+1.0 & \text{en otro caso}
+\end{cases}
+\end{equation}
+
+\textbf{Fundamentación de los Parámetros:}
+
+\begin{enumerate}
+    \item \textbf{Coeficiente de Fricción ($\Phi=0,4$ para $r < 30k$):} 
+    Evitamos un filtrado binario (0) para capturar el fenómeno \textit{Asset Rich, Cash Poor}. Aunque la renta de flujo (pensión) sea insuficiente, gran parte del target posee vivienda en propiedad susceptible de licuación patrimonial (venta/alquiler) para financiar la plaza. El factor 0,4 modela la \textbf{mayor resistencia a la conversión} (fricción de venta) en este segmento, penalizando el score sin descartar la demanda latente.
+
+    \item \textbf{Decaimiento Hiperbólico ($\Phi \propto 1/r$ para $r > 65k$):} 
+    Se aplica una penalización inversa para rentas altas. Aunque la capacidad de pago es total, estas zonas presentan un coste de suelo (repercusión) que dispara el \textbf{CAPEX} (Inversión de Capital Inicial). Dado que el precio de la plaza tiene un techo de mercado ($\approx 2.500$\euro{}), un suelo excesivamente caro erosiona la Tasa Interna de Retorno (TIR). Esta función prioriza zonas de clase media donde el binomio coste-suelo/precio-venta es óptimo. Además, existe un desajuste entre la propuesta de valor (2.100\text{\euro{}}/mes) y las expectativas del segmento \textit{High Net Worth}, que demanda servicios de lujo (mayor de 4.000\text{\euro{}}) fuera del alcance de este proyecto. Evitamos así la canibalización por competidores del segmento \textit{Luxury}.
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Fase 3: Feature Engineering de Disparadores Sociales}
+
+\subsubsection{Variable A: Ratio de Presión de Cuidados ($\Pi$)}
+
+Basándonos en el concepto de \textit{Caregiver Burnout}, calculamos el ratio de presión de cuidados para cada sección censal $i$:
+
+\begin{equation}
+\Pi_i = \frac{\text{Mujeres}_{80+, i}}{\text{Mujeres}_{45\text{-}64, i} + \epsilon}
+\end{equation}
+
+donde $\epsilon = 0.001$ evita división por cero.
+
+\textbf{Interpretación:} Este ratio mide la carga potencial de cuidados sobre la cohorte de mujeres de mediana edad (principales cuidadoras informales según el INE). 
+\begin{itemize}
+    \item $\Pi_i \gg 1$: Alta presión asistencial; déficit de cuidadoras familiares en la sección.
+    \item $\Pi_i \ll 1$: Baja presión; mayor capacidad de soporte familiar en el hogar.
+\end{itemize}
+
+\subsubsection{Variable B: Factor de Burnout Normalizado ($\beta$)}
+
+Para asegurar la estabilidad del modelo y evitar que valores extremos (outliers) en secciones muy envejecidas distorsionen el Score Global, aplicamos una normalización centrada en la media nacional $\bar{\Pi}$:
+
+\begin{equation}
+\beta_i = \text{clip}\left(\frac{\Pi_i}{\bar{\Pi}}, 0.5, 1.5\right)
+\end{equation}
+
+El uso de la función \textit{clip} limita el impacto de la variable a un rango de $[0.5, 1.5]$, evitando que un solo factor anule o dispare artificialmente el resultado final.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Fase 4: Función de Score Global}
+
+El score L-SOMA integra todas las variables mediante:
+
+\begin{equation}
+\mathcal{S}_i = \mathcal{R}_i \cdot \Phi_{econ}(r_i) \cdot \beta_i
+\end{equation}
+
+Esta formulación multiplicativa garantiza que:
+\begin{itemize}
+    \item Una sección con resonancia alta pero renta baja obtiene score bajo (filtro económico).
+    \item Una sección con resonancia alta y renta adecuada pero baja presión de cuidados obtiene score moderado.
+    \item Solo las secciones con \textbf{todos} los factores favorables alcanzan scores máximos.
+\end{itemize}
+
+
+
+
+
+
+\subsection{Fase 5: Clustering Espacial (DBSCAN)}
+
+Las secciones individuales no son unidades de negocio viables. Una residencia de 100 camas requiere captar clientes de múltiples secciones adyacentes. Aplicamos DBSCAN sobre los \textbf{centroides geográficos} de las secciones filtradas ($\mathcal{S}_i > \text{Umbral}$) para identificar ``manchas'' de alta densidad.
+
+
+
+\begin{definition}[DBSCAN con Métrica Haversine]
+DBSCAN agrupa puntos basándose en la densidad espacial, robusto frente al ruido.
+\begin{itemize}
+    \item \textbf{Input:} Coordenadas (Lat, Lon) de las secciones con alto Score.
+    \item \textbf{Distancia:} Fórmula de Haversine (distancia geodésica sobre la esfera terrestre).
+\end{itemize}
+\end{definition}
+
+\textbf{Hiperparámetros seleccionados:}
+\begin{itemize}
+    \item $\epsilon = 1.5 \text{ km}$ ($0.000235$ rad): Define el radio máximo de captación peatonal/local.
+    \item $\text{minPts} = 3$: Mínimo de secciones necesarias para formar un núcleo. Esto garantiza una masa crítica poblacional aproximada de 4.500 habitantes por cluster, reduciendo el riesgo de micro-mercados.
+\end{itemize}
+
+
+
+% --- Figura: Mapa Clusters España ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{mapa_clusters_espana.pdf}
+    \caption{Distribución geográfica de los clusters detectados por DBSCAN. Cada color representa un cluster diferente.}
+    \label{fig:mapa_clusters}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% =============================================================================
+\section{Resultados: Análisis de Clustering}
+% =============================================================================
+
+\subsection{Estadísticas Globales de Clustering}
+
+Tras aplicar DBSCAN sobre las secciones del percentil 85+ (Top 15\% por Score Global), se obtienen:
+
+\begin{table}[H]
+\centering
+\caption{Resumen del Clustering Espacial}
+\label{tab:clustering}
+\begin{tabular}{lr}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Secciones analizadas (Top 15\%) & 3.468 \\
+\midrule
+Clusters detectados & 135 \\
+Secciones en clusters viables & 2.624 \\
+Secciones descartadas (ruido/aisladas) & 844 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Top 10 Clusters por Potencia Total}
+
+La ``potencia'' de un cluster se define como la suma de los scores individuales de sus secciones:
+
+\begin{equation}
+\text{Potencia}_c = \sum_{i \in c} \mathcal{S}_i
+\end{equation}
+
+\begin{table}[H]
+\centering
+\caption{Top 10 Clusters de Mayor Potencia}
+\label{tab:top10}
+\begin{tabular}{clccc}
+\toprule
+\textbf{Rank} & \textbf{Zona Representativa} & \textbf{Secciones} & \textbf{Renta Media} & \textbf{Potencia} \\
+\midrule
+1 & Madrid & 722 & 47.466\euro{} & 421,7 \\
+2 & Barcelona & 323 & 45.313\euro{} & 185,5 \\
+3 & Bilbao & 209 & 43.073\euro{} & 124,3 \\
+4 & Zaragoza & 141 & 42.624\euro{} & 83,1 \\
+5 & Valladolid & 98 & 40.330\euro{} & 59,5 \\
+6 & Donostia/San Sebastián & 83 & 48.727\euro{} & 48,8 \\
+7 & Sevilla & 82 & 48.743\euro{} & 47,6 \\
+8 & Pamplona/Iruña & 74 & 46.973\euro{} & 44,7 \\
+9 & València & 74 & 43.915\euro{} & 42,3 \\
+10 & Gijón & 70 & 37.825\euro{} & 41,1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% --- Figura: Top 10 Clusters ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{barras_top10_clusters.pdf}
+    \caption{Comparativa de potencia de los Top 10 clusters identificados.}
+    \label{fig:barras_top10}
+\end{figure}
+
+
+
+
+
+
+
+\subsection{Visualización Geográfica de Clusters}
+
+% --- Figura: Mapa Madrid ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{mapa_madrid_clusters.pdf}
+    \caption{Detalle de clusters en el área metropolitana de Madrid. El color indica el Cluster ID; la intensidad representa el Score Global.}
+    \label{fig:mapa_madrid}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% =============================================================================
+\section{Resultados: Análisis de Masa Crítica y Viabilidad}
+% =============================================================================
+
+\subsection{Concepto de Masa Crítica}
+
+Definimos la \textbf{Masa Crítica} como el volumen mínimo de demanda latente necesario para justificar la inversión. En el sector de residencias, la viabilidad financiera no depende solo de la calidad demográfica (porcentajes), sino de la \textbf{escala absoluta}.
+
+La necesidad de alcanzar esta masa crítica responde a la estructura de costes operativos (OPEX) del negocio:
+\begin{itemize}
+    \item \textbf{Economías de Escala:} Una residencia estándar requiere una plantilla fija mínima (médico, enfermería 24h, cocina, limpieza) independientemente de la ocupación.
+    \item \textbf{Umbral de Rentabilidad:} Por debajo de 80-90 camas, el coste fijo por residente se dispara, erosionando el margen EBITDA.
+    \item \textbf{Mitigación de Riesgo:} Un \textit{pool} de demanda amplio es necesario para amortiguar la rotación natural de plazas (fallecimientos) sin que la ocupación caiga por debajo del 90\%.
+\end{itemize}
+
+Por tanto, el algoritmo no busca solo ``donde hay ancianos'', sino ``donde hay \textit{suficientes} ancianos'' para llenar un activo de escala industrial.
+
+\subsection{Cálculo de Demanda Efectiva por Sección}
+
+Para cuantificar esta masa con precisión censal, el modelo calcula la población objetivo exacta ($T_i$) para cada sección $i$, integrando directamente las probabilidades de la Matriz P:
+
+\begin{equation}
+T_i = P_{i,\text{total}} \cdot \sum_{r \in \text{Target}} p_{i,r}
+\end{equation}
+
+donde:
+\begin{itemize}
+    \item $P_{i,\text{total}}$: Población total registrada en la sección censal.
+    \item $p_{i,r}$: Probabilidad de pertenencia al grupo demográfico objetivo (Mujeres $>80$ años) extraída de la matriz de distribución demográfica.
+\end{itemize}
+
+El análisis computacional arroja una media nacional de \textbf{70,1 mujeres target por sección censal}, dato que sirve de base para la agregación por clusters.
+
+\subsection{Modelo de Viabilidad Operativa}
+
+Una vez identificados los clusters espaciales, evaluamos su viabilidad transformando la demanda demográfica en capacidad de absorción de camas.
+
+La \textbf{Capacidad Teórica} ($C_c$) de un cluster $c$ se define como:
+
+\begin{equation}
+C_c = \sum_{i \in c} T_i \cdot \phi
+\end{equation}
+
+donde $\phi$ es la cuota de mercado (\textit{Market Share}) estimada, que representa el porcentaje de la población target que efectivamente optará por el servicio residencial privado.
+
+Se establece una función de decisión binaria basada en el umbral de eficiencia operativa:
+
+\begin{equation}
+\text{Viable}_c = \begin{cases}
+1 (\text{Aprobado}) & \text{si } C_c \geq 85 \text{ camas} \\
+0 (\text{Descartado}) & \text{en otro caso}
+\end{cases}
+\end{equation}
+
+Este corte duro (\textit{hard cut}) de 85 camas asegura que solo se seleccionen ubicaciones capaces de sostener los costes fijos estructurales descritos anteriormente. El umbral corresponde a la capacidad mínima considerada viable operativamente por los principales operadores del sector, superando en un 15\% la media nacional de 74,8 plazas/centro \cite{inforesidencias_precios}.
+
+\subsection{Escenarios de Penetración de Mercado}
+
+Dada la variabilidad inherente a la tasa de conversión comercial ($\phi$), se presenta un análisis de sensibilidad que evalúa la robustez de los clusters ante diferentes escenarios.
+
+\begin{table}[H]
+\centering
+\caption{Matriz de Viabilidad según Cuota de Mercado ($\phi$)}
+\label{tab:sensibilidad}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Escenario} & \textbf{Share ($\phi$)} & \textbf{Clusters Viables} & \textbf{Camas Potenciales} & \textbf{Gap vs Objetivo} \\
+\midrule
+Muy Conservador & 1,5\% & 6 & 17 & -983 \\
+Conservador & 2,0\% & 12 & 29 & -971 \\
+Base & 3,0\% & 19 & 50 & -950 \\
+Agresivo & 5,0\% & 25 & 91 & -909 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% --- Figura: Sensibilidad ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{sensibilidad_share.pdf}
+    \caption{Curva de sensibilidad: Número de residencias operativamente viables en función de la cuota de mercado proyectada.}
+    \label{fig:sensibilidad}
+\end{figure}
+
+\subsection{Distribución Geográfica de Clusters Viables}
+
+% --- Figura: Clusters Viables ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{mapa_viables_subcriticos.pdf}
+    \caption{Distribución geográfica de los clusters viables para construcción de residencias. Cada color representa un cluster diferente con capacidad $\geq$ 85 camas.}
+    \label{fig:mapa_viabilidad}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+\section{La Frontera de Rentabilidad: Algoritmo de Expansión Adaptativa}
+% =============================================================================
+
+\subsection{Motivación}
+
+Los resultados del modelo Prime demuestran que, bajo restricciones estrictas de calidad demográfica y viabilidad operativa, el mercado español soporta únicamente \textbf{64 residencias} potenciales. Esta cifra dista significativamente del objetivo estratégico de 1.000 unidades.
+
+Surge entonces la pregunta crítica: \textbf{¿Cuántas residencias adicionales podrían ubicarse si relajamos progresivamente las restricciones del modelo?} Para responderla, desarrollamos un algoritmo de \textit{Descenso de Riesgo} que explora sistemáticamente el espacio de parámetros.
+
+\subsection{Diseño del Algoritmo de Expansión}
+
+El algoritmo parte de los parámetros ``Prime'' (óptimos) y entra en un bucle iterativo que relaja variables de forma inteligente, priorizando aquellas que ofrecen \textbf{mayor ganancia marginal con menor deterioro del modelo}.
+
+\subsubsection{Jerarquía de Riesgo}
+
+Se definen cuatro niveles de riesgo ordenados de menor a mayor impacto en la calidad del modelo:
+
+\begin{table}[H]
+\centering
+\caption{Jerarquía de Variables para Relajación}
+\label{tab:jerarquia_riesgo}
+\begin{tabular}{clccc}
+\toprule
+\textbf{Nivel} & \textbf{Variable} & \textbf{Inicio} & \textbf{Límite} & \textbf{Step} \\
+\midrule
+1 (Bajo) & Percentil de Score & 85 & 60 & -1 \\
+2 (Medio) & Market Share ($\phi$) & 3,0\% & 6,0\% & +0,2\% \\
+3 (Alto) & Penalización Renta & 0,40 & 0,70 & +0,05 \\
+4 (Crítico) & Camas Mínimas & 85 & 60 & -1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Criterio de Selección Inteligente}
+
+En cada iteración, el algoritmo \textbf{no desciende secuencialmente} por los niveles, sino que evalúa todas las opciones disponibles y selecciona aquella que maximiza la ganancia ajustada por riesgo:
+
+\begin{equation}
+\text{Ganancia}_{\text{ajustada}} = \frac{\Delta \text{Residencias}}{\text{Nivel de Riesgo}}
+\end{equation}
+
+Este enfoque garantiza que se agote el potencial de los parámetros de bajo riesgo antes de recurrir a relajaciones más agresivas.
+
+\subsection{Resultados de la Expansión}
+
+El algoritmo ejecutó \textbf{71 iteraciones} hasta alcanzar el límite de expansión en todos los parámetros. La Figura~\ref{fig:expansion_convergencia} muestra la curva de convergencia.
+
+% --- Figura: Curva de Convergencia ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{expansion_convergencia.pdf}
+    \caption{Curva de convergencia del algoritmo de expansión. Los colores indican el nivel de riesgo del parámetro relajado en cada iteración. La línea punteada azul representa el modelo Prime (64 residencias) y la línea discontinua roja el objetivo (1.000).}
+    \label{fig:expansion_convergencia}
+\end{figure}
+
+\subsubsection{Parámetros Finales}
+
+Tras agotar todas las posibilidades de relajación, los parámetros finales fueron:
+
+\begin{itemize}
+    \item \textbf{Percentil de Score:} 60 (antes 85)
+    \item \textbf{Market Share ($\phi$):} 6,0\% (antes 3,0\%)
+    \item \textbf{Penalización Renta:} 0,70 (antes 0,40)
+    \item \textbf{Camas Mínimas:} 60 (antes 85)
+\end{itemize}
+
+\subsection{Comparativa: Modelo Prime vs Modelo Expandido}
+
+La Tabla~\ref{tab:comparativa_expansion} presenta la comparación detallada entre ambos modelos.
+
+\begin{table}[H]
+\centering
+\caption{Comparativa entre Modelo Prime y Modelo Expandido}
+\label{tab:comparativa_expansion}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Métrica} & \textbf{Prime} & \textbf{Expandido} & \textbf{$\Delta$} \\
+\midrule
+Residencias Potenciales & 64 & 359 & +295 \\
+Clusters Viables & 21 & 91 & +70 \\
+Camas Totales & 6.440 & 35.991 & +29.551 \\
+Renta Media Cluster (\euro{}) & 42.517 & 40.410 & -2.107 \\
+Score Demográfico Medio & 0,594 & 0,470 & -0,124 \\
+Tamaño Medio Residencia (camas) & 306,7 & 395,5 & +88,8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% --- Figura: Comparativa Visual ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{expansion_comparativa.pdf}
+    \caption{Comparativa visual entre el Modelo Prime (azul) y el Modelo Expandido (rojo). Se observa el trade-off entre volumen de residencias y calidad demográfica/económica.}
+    \label{fig:expansion_comparativa}
+\end{figure}
+
+\subsection{Distribución Geográfica de Clusters Expandidos}
+
+La Figura~\ref{fig:expansion_mapa} muestra la distribución espacial de los 91 clusters viables tras la expansión. El tamaño de cada punto representa la capacidad en camas, mientras que el color indica la renta media.
+
+% --- Figura: Mapa Expandido ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{expansion_mapa_clusters.pdf}
+    \caption{Distribución geográfica de los 91 clusters viables tras la expansión adaptativa. El tamaño representa la capacidad en camas y el color la renta media del cluster.}
+    \label{fig:expansion_mapa}
+\end{figure}
+
+\subsection{Interpretación del Gap Restante}
+
+A pesar de llevar todos los parámetros a sus límites de relajación, el modelo expandido alcanza únicamente \textbf{359 residencias}, dejando un \textbf{gap de 641 unidades} respecto al objetivo de 1.000.
+
+\subsection{Análisis de Rendimientos Decrecientes}
+
+Un análisis detallado de las 71 iteraciones revela un patrón de \textbf{rendimientos fuertemente decrecientes} que invalida la necesidad de llevar todos los parámetros a sus límites.
+
+\begin{table}[H]
+\centering
+\caption{Eficiencia Marginal por Fase de Iteración}
+\label{tab:rendimientos_decrecientes}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Fase} & \textbf{Iteraciones} & \textbf{Residencias} & \textbf{$\Delta$} & \textbf{Ganancia/iter.} & \textbf{Parámetros Afectados} \\
+\midrule
+Fase 1 & 1--40 & 64 $\rightarrow$ 348 & +284 & \textbf{7,1} & Percentil, Market Share \\
+Fase 2 & 41--71 & 348 $\rightarrow$ 359 & +11 & \textbf{0,35} & Penal. Renta, Camas Mín. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Punto de Inflexión: Iteración 40}
+
+En la iteración 40, el algoritmo alcanza \textbf{348 residencias} con los siguientes parámetros:
+
+\begin{itemize}
+    \item Percentil de Score: 60 (límite)
+    \item Market Share: 6,0\% (límite)
+    \item Penalización Renta: \textbf{0,40} (sin modificar)
+    \item Camas Mínimas: \textbf{85} (sin modificar)
+\end{itemize}
+
+A partir de este punto, las \textbf{31 iteraciones restantes} solo consiguen \textbf{+11 residencias adicionales} (+3,2\%), pero a costa de:
+\begin{itemize}
+    \item Incrementar la tolerancia a rentas bajas de 0,40 a 0,70 (+75\%)
+    \item Reducir el umbral de viabilidad de 85 a 60 camas (-29\%)
+\end{itemize}
+
+Esto representa una \textbf{eficiencia marginal 20 veces inferior} a la fase inicial (0,35 vs 7,1 residencias por iteración).
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Recomendación Operativa]
+\textbf{El punto óptimo de expansión se encuentra en la iteración 40}, con 348 residencias potenciales. Continuar más allá de este punto ofrece ganancias marginales insignificantes (+11 residencias) a cambio de aceptar ubicaciones con menor solvencia económica y menor escala operativa. El modelo en la iteración 40 preserva la calidad del proyecto al mantener los umbrales de penalización por renta (0,40) y camas mínimas (85) en sus valores originales.
+\end{tcolorbox}
+
+\subsubsection{Conclusión sobre la Capacidad Real del Mercado}
+
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black,title=Conclusión Crítica]
+El análisis de frontera demuestra que \textbf{no existe capacidad demográfica suficiente} en el territorio español para soportar 1.000 nuevas residencias mediante construcción orgánica, incluso bajo supuestos agresivos de penetración de mercado (6\%) y umbrales reducidos de viabilidad (60 camas).
+\end{tcolorbox}
+
+\subsection{Implicaciones Estratégicas}
+
+\begin{enumerate}
+    \item \textbf{Límite estructural del mercado:} El gap de 641 residencias representa un límite demográfico-geográfico que no puede superarse únicamente con construcción de nuevas instalaciones.
+    
+    \item \textbf{Deterioro de calidad:} Pasar del modelo Prime (64 residencias) al Expandido (359) implica aceptar una reducción del 21\% en el score demográfico medio y del 5\% en la renta media.
+    
+    \item \textbf{Estrategia M\&A imperativa:} Para cubrir el gap restante, es \textbf{ineludible} una estrategia de fusiones y adquisiciones de operadores existentes.
+    
+    \item \textbf{Zona óptima:} El análisis sugiere que el punto de equilibrio entre volumen y calidad se encuentra entre 100-150 residencias, donde los parámetros aún mantienen niveles razonables de calidad.
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% =============================================================================
+\section{Validación de Competencia: Análisis de Oferta Existente}
+% =============================================================================
+
+\subsection{Motivación del Análisis}
+
+El modelo L-SOMA identifica ubicaciones con \textbf{demanda potencial}, pero no considera la \textbf{oferta existente} de competidores. Una zona con alta demanda pero saturada de operadores no constituye una oportunidad real de negocio.
+
+Para completar el análisis estratégico, se desarrolló un módulo de validación que cruza los clusters identificados con la oferta real de residencias obtenida de \textbf{Google Places API}.
+
+\subsection{Metodología}
+
+\subsubsection{Parámetros del Análisis}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Configuración del Análisis de Competencia}
+\label{tab:config_competencia}
+\begin{tabular}{p{3.5cm}p{4.5cm}p{6cm}}
+\toprule
+\textbf{Parámetro} & \textbf{Valor} & \textbf{Justificación} \\
+\midrule
+Radio de búsqueda & 1.500 m & Coherente con DBSCAN ($\varepsilon$=1,5km) \\
+Camas por competidor & 75 & Media nacional (IMSERSO 2023: 74,8 plazas/centro) \\
+API utilizada & Text Search v1 & Google Places API (New) \\
+Query de búsqueda & \textit{``Residencia de ancianos} \newline \textit{OR Geriátrico''} & Términos más frecuentes del sector \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Cálculo del Índice de Saturación}
+
+Para cada cluster, se calcula el \textbf{Índice de Saturación} ($I_{sat}$):
+
+\begin{equation}
+I_{sat} = \frac{\text{Oferta Estimada (camas)}}{\text{Demanda Potencial (camas)}} = \frac{N_{competidores} \times 75}{\text{Camas\_Potenciales}}
+\end{equation}
+
+\subsubsection{Clasificación Estratégica}
+
+Los clusters se clasifican según su $I_{sat}$:
+
+\begin{itemize}
+    \item \textbf{Blue Ocean} ($I_{sat} < 0,20$): Mercado con poca o nula competencia. \textit{Oportunidad premium}.
+    \item \textbf{Batalla} ($0,20 \leq I_{sat} \leq 1,0$): Competencia moderada. Viable con diferenciación.
+    \item \textbf{Saturado} ($I_{sat} > 1,0$): La oferta supera la demanda. \textit{A descartar}.
+\end{itemize}
+
+\subsection{Resultados}
+
+De los 91 clusters analizados:
+
+\begin{table}[H]
+\centering
+\caption{Distribución de Clusters por Nivel de Saturación}
+\label{tab:distribucion_saturacion}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Clasificación} & \textbf{Clusters} & \textbf{\%} & \textbf{Interpretación} \\
+\midrule
+\textcolor{blue}{\textbf{Blue Ocean}} & 3 & 3,3\% & Oportunidades de oro \\
+\textcolor{orange}{\textbf{Batalla}} & 13 & 14,3\% & Viables con estrategia \\
+\textcolor{red}{\textbf{Saturado}} & 75 & 82,4\% & Descartados \\
+\midrule
+\textbf{Total} & 91 & 100\% & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% --- Figura: Distribución Competencia ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{competencia_distribucion.pdf}
+    \caption{Distribución de los 91 clusters según nivel de saturación de mercado. Solo 3 clusters (3,3\%) califican como Blue Oceans.}
+    \label{fig:competencia_distribucion}
+\end{figure}
+
+\subsection{Los 3 Blue Oceans Identificados}
+
+Solo 3 clusters presentan un índice de saturación inferior a 0,20, constituyendo las \textbf{oportunidades premium} del análisis:
+
+\begin{table}[H]
+\centering
+\caption{Blue Oceans: Clusters con Mínima Competencia}
+\label{tab:blue_oceans}
+\begin{tabular}{clcccp{4.5cm}}
+\toprule
+\textbf{Rank} & \textbf{Ubicación} & \textbf{Camas} & \textbf{Comp.} & \textbf{$I_{sat}$} & \textbf{Rival cercano} \\
+\midrule
+1 & \textbf{Madrid Centro} & 7.274 & 7 & 0,077 & Hermanitas Desamparados (230m) \\
+2 & \textbf{Bilbao} & 2.114 & 4 & 0,151 & Anai Cantero (367m) \\
+3 & \textbf{Málaga Costa} & 419 & 1 & 0,191 & Hermanitas Pobres (1.041m) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Análisis de los Blue Oceans}
+
+\begin{enumerate}
+    \item \textbf{Madrid Centro (Cluster 4):} Con 1.577 secciones censales y una demanda potencial de 7.274 camas, presenta solo 7 competidores identificados. El $I_{sat}$ de 0,077 indica que la oferta actual cubre apenas el 7,7\% de la demanda potencial. Sin embargo, este cluster presenta una \textbf{alta barrera de entrada inmobiliaria}: el elevado coste del suelo urbano hace inviable el modelo greenfield tradicional. La oportunidad reside en la \textit{reconversión} de edificios de otros usos (oficinas, hoteles) o en residencias de \textit{alto standing} que justifiquen el repercutido del suelo.
+    
+    \item \textbf{Bilbao (Cluster 12):} Área metropolitana con 476 secciones y 2.114 camas potenciales. Los 4 competidores detectados dejan un gap de más de 1.800 camas, indicando una \textbf{necesidad social no cubierta}. Al igual que Madrid, requiere un operador institucional con capacidad de CAPEX elevado para desbloquear suelo urbano o proyectos de reconversión.
+    
+    \item \textbf{Málaga Costa (Cluster 27):} Zona con 110 secciones, renta media de 40.418\euro{} y un único competidor a más de 1km del centroide. Menor barrera de entrada y potencial para modelo greenfield tradicional. Representa una \textbf{oportunidad de nicho} para operadores medianos.
+\end{enumerate}
+
+\subsection{Limitaciones del Análisis de Competencia}
+
+\begin{enumerate}
+    \item \textbf{Cobertura de Google Places:} La API puede no incluir todos los operadores, especialmente centros pequeños o recién abiertos.
+    
+    \item \textbf{Estimación de camas:} Se asume 75 camas/competidor. La realidad varía entre 30 y 200 camas por centro.
+    
+    \item \textbf{No se considera ocupación:} Un competidor puede estar al 50\% de ocupación, dejando demanda sin cubrir.
+    
+    \item \textbf{Snapshot temporal:} Los datos reflejan el estado a enero 2026. El mercado es dinámico.
+\end{enumerate}
+
+
+
+
+
+
+
+
+% =============================================================================
+\section{Discusión}
+% =============================================================================
+
+\subsection{Síntesis de Hallazgos Cuantitativos}
+
+El análisis exhaustivo del territorio español mediante el algoritmo L-SOMA ha producido los siguientes hallazgos verificados:
+
+\begin{table}[H]
+\centering
+\caption{Métricas Principales del Análisis L-SOMA}
+\label{tab:metricas_principales}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor Verificado} \\
+\midrule
+Total secciones censales analizadas & 32.910 \\
+Secciones en Top 15\% (candidatas) & 4.937 \\
+Clusters detectados (DBSCAN $\varepsilon$=1,5km) & 135 \\
+Clusters viables (Modelo Prime, $\geq$85 camas) & 21 \\
+Residencias potenciales (Modelo Prime, 3\%) & 64 \\
+Residencias máximo teórico (Modelo Expandido, 6\%) & 359 \\
+Target promedio real (mujeres 80+/sección) & 70,1 \\
+\midrule
+\textit{Validación de Competencia (Google Places):} & \\
+Clusters Blue Ocean ($I_{sat} < 0,20$) & 3 (3,3\%) \\
+Clusters Batalla ($0,20 \leq I_{sat} \leq 1,0$) & 13 (14,3\%) \\
+Clusters Saturados ($I_{sat} > 1,0$) & 75 (82,4\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Concentración Geográfica de la Demanda}
+
+Los datos revelan una \textbf{fuerte concentración metropolitana} de la demanda viable. Los 5 clusters con mayor potencia acumulan el 56\% de la capacidad total:
+
+\begin{enumerate}
+    \item \textbf{Madrid (Cluster 3):} 722 secciones, Potencia 421,7, Renta media 47.466\euro{}
+    \item \textbf{Barcelona (Cluster 4):} 323 secciones, Potencia 185,5, Renta media 45.313\euro{}
+    \item \textbf{Bilbao (Cluster 11):} 209 secciones, Potencia 124,3, Renta media 43.073\euro{}
+    \item \textbf{Zaragoza (Cluster 2):} 141 secciones, Potencia 83,1, Renta media 42.624\euro{}
+    \item \textbf{Valladolid (Cluster 12):} 98 secciones, Potencia 59,5, Renta media 40.330\euro{}
+\end{enumerate}
+
+\textit{Nota: Los IDs de cluster corresponden al ranking demográfico (\texttt{ranking\_fase7\_clusters.csv}). El análisis de competencia posterior (Sección 8) opera sobre el dataset expandido, donde los IDs difieren.}
+
+El restante 44\% se distribuye entre 130 clusters de menor escala, muchos de los cuales no alcanzan el umbral de viabilidad operativa.
+
+\subsection{Análisis del Gap Estratégico}
+
+El objetivo inicial de 1.000 residencias presenta un \textbf{gap estructural insalvable} mediante construcción orgánica:
+
+\begin{itemize}
+    \item \textbf{Modelo Prime (parámetros estrictos):} 64 residencias viables
+    \item \textbf{Modelo Expandido (parámetros relajados):} 359 residencias máximo
+    \item \textbf{Gap irreducible:} 641 residencias (64\% del objetivo)
+\end{itemize}
+
+El algoritmo de expansión adaptativa demostró que, incluso llevando todos los parámetros a sus límites (percentil 60, market share 6\%, penalización 0,70, camas mínimas 60), el mercado español no soporta más de 359 ubicaciones potenciales.
+
+\subsection{Rendimientos Decrecientes y Punto Óptimo}
+
+El análisis de las 72 iteraciones del algoritmo de expansión (0--71) reveló un patrón crítico:
+
+\begin{itemize}
+    \item \textbf{Iteraciones 1-40:} +284 residencias (7,1 por iteración)
+    \item \textbf{Iteraciones 41-71:} +11 residencias (0,35 por iteración)
+\end{itemize}
+
+La eficiencia marginal cae un 95\% tras la iteración 40, donde se alcanzan 348 residencias sin degradar los parámetros de calidad económica (penalización renta y camas mínimas). Este constituye el \textbf{punto óptimo operativo}.
+
+\subsection{Saturación del Mercado: Análisis de Competencia}
+
+La validación mediante Google Places API reveló un dato crítico: \textbf{el 82,4\% de los clusters viables ya están saturados} de competidores.
+
+\begin{itemize}
+    \item \textbf{Blue Oceans (3 clusters):} Madrid Centro (7.274 camas, $I_{sat}$=0,077), Bilbao (2.114 camas, $I_{sat}$=0,151) y Málaga Costa (419 camas, $I_{sat}$=0,191). Son las únicas oportunidades reales de entrada sin competencia directa.
+    
+    \item \textbf{Batallas (13 clusters):} Mercados viables pero con competencia moderada. Requieren diferenciación o ventaja competitiva.
+    
+    \item \textbf{Saturados (75 clusters):} La oferta existente supera la demanda potencial. Desaconsejados para nueva construcción.
+\end{itemize}
+
+Este hallazgo reduce drásticamente el universo de oportunidades: de las 64-348 residencias teóricamente viables, solo las ubicadas en los \textbf{3 Blue Oceans} garantizan entrada sin competencia directa.
+
+\subsection{Limitaciones del Estudio}
+
+\begin{enumerate}
+    \item \textbf{Horizonte temporal estático:} Los datos corresponden al censo 2021-2025. No se modelan proyecciones demográficas futuras. Una sección con muchos habitantes de 60-65 años hoy será un \textit{hotspot} en 15 años, pero el modelo actual la descarta. Para inversiones inmobiliarias con amortización a 20-30 años, esta es una limitación relevante.
+    
+    \item \textbf{Cuota de mercado estimada:} Los escenarios de 1,5\% a 6\% de market share son hipotéticos; no existen datos públicos de tasas de institucionalización por segmento premium.
+    
+    \item \textbf{Incertidumbre en la competencia (Google Places):} La estimación del índice de saturación $I_{sat}$ depende de dos asunciones frágiles: (1) que la API de Google captura el 100\% de la oferta relevante (falso en zonas rurales o centros antiguos), y (2) que cada competidor tiene 75 camas (media nacional). La varianza real oscila entre 20 y 200 camas por centro, introduciendo un margen de error significativo en la clasificación Blue Ocean vs. Saturado.
+    
+    \item \textbf{Proxy de presión de cuidados ($\Pi_i$):} El ratio asume que todas las mujeres de 45-64 años en la sección son cuidadoras potenciales, ignorando la movilidad laboral (hijas que residen en otro código postal). Es un proxy de proximidad, no de disponibilidad real para el cuidado.
+    
+    \item \textbf{Target demográfico simplificado:} El vector Q considera mujeres 80+ de hogares $>$30k\euro{} como proxy de demanda premium, excluyendo otros segmentos potencialmente interesados.
+\end{enumerate}
+
+
+
+
+
+
+% =============================================================================
+\section{Conclusiones}
+% =============================================================================
+
+El desarrollo y ejecución del algoritmo L-SOMA sobre las 32.910 secciones censales españolas permite extraer las siguientes conclusiones fundamentadas en datos:
+
+\subsection{Validación Metodológica}
+
+\begin{enumerate}
+    \item \textbf{Divergencia Jensen-Shannon efectiva:} La métrica JSD permitió ordenar las secciones por ``resonancia'' con el perfil objetivo, reduciendo el universo de análisis de 32.910 a 4.937 candidatas (Top 15\%).
+    
+    \item \textbf{DBSCAN geodésico funcional:} El clustering espacial con $\varepsilon$=1,5km identificó 135 agrupaciones naturales de demanda, de las cuales 21 superan el umbral de viabilidad en el modelo Prime.
+    
+    \item \textbf{Auditoría de supuestos exitosa:} La corrección del target promedio de 110 a 70,1 mujeres/sección (verificado desde Matriz P) demostró la importancia de validar constantes con datos reales.
+\end{enumerate}
+
+\subsection{Hallazgos Estratégicos}
+
+\begin{enumerate}
+    \item \textbf{Capacidad máxima verificada:} España soporta entre \textbf{64 y 348 residencias} mediante construcción orgánica, dependiendo del nivel de exigencia en los parámetros de calidad.
+    
+    \item \textbf{Concentración metropolitana:} Los 5 primeros clusters (Madrid, Barcelona, Bilbao, Zaragoza, Valladolid) concentran el 56\% de la potencia total identificada.
+    
+    \item \textbf{Objetivo de 1.000 residencias inalcanzable orgánicamente:} El gap de 641 unidades requiere obligatoriamente una estrategia de fusiones y adquisiciones (M\&A).
+    
+    \item \textbf{Punto óptimo en iteración 40:} Con 348 residencias se maximiza el volumen preservando la calidad del modelo (eficiencia marginal cae 95\% más allá de este punto).
+    
+    \item \textbf{Mercado altamente saturado:} El 82,4\% de los clusters viables presenta saturación de oferta ($I_{sat} > 1$). Solo 3 clusters (Madrid Centro, Bilbao, Málaga Costa) califican como Blue Oceans.
+    
+    \item \textbf{Madrid Centro: oportunidad excepcional:} Con 7.274 camas potenciales y solo 7 competidores identificados ($I_{sat}$=0,077), representa la mayor oportunidad teórica, condicionada a la alta barrera de entrada inmobiliaria (disponibilidad de activos y coste del suelo)..
+\end{enumerate}
+
+\subsection{Recomendación Estratégica Final}
+
+Basándose exclusivamente en los datos analizados, la estrategia óptima combina:
+
+\begin{itemize}
+    \item \textbf{Construcción orgánica selectiva:} 64-100 residencias en los clusters de máxima potencia (Madrid, Barcelona, Bilbao), aplicando el modelo Prime para garantizar calidad demográfica.
+    
+    \item \textbf{Expansión moderada:} Hasta 250 residencias adicionales relajando el percentil a 60 y el market share a 6\%, pero preservando penalización de renta (0,40) y camas mínimas (85).
+    
+    \item \textbf{M\&A para el gap restante:} Las 641 residencias faltantes solo pueden cubrirse mediante adquisición de operadores existentes fuera del alcance de este modelo.
+\end{itemize}
+
+\newpage
+% =============================================================================
+% ANEXOS
+% =============================================================================
+
+\appendix
+
+\section{Anexo A: Datos de Entrada}
+\label{anexo:datos}
+
+El análisis L-SOMA utilizó las siguientes fuentes de datos oficiales:
+
+\begin{table}[H]
+\centering
+\caption{Fuentes de Datos Utilizadas}
+\label{tab:fuentes_datos}
+\begin{tabular}{lll}
+\toprule
+\textbf{Dato} & \textbf{Fuente} & \textbf{Año} \\
+\midrule
+Población por edad/sexo & INE - Censo de Población & 2021-2024 \\
+Renta media por hogar & INE - Atlas de Renta & 2023 \\
+Geometría secciones censales & IGN - SECC\_CE\_20240101 & 2024 \\
+Coordenadas centroides & Cálculo propio desde shapefile & 2024 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Vector Q (Target demográfico):} Mujeres mayores de 80 años en hogares con renta $>$30.000\euro{}/año. Representan el 6,2\% de la población según Matriz P.
+
+\textbf{Poblaciones procesadas:}
+\begin{itemize}
+    \item Secciones censales totales: 32.910
+    \item Secciones con coordenadas válidas: 32.910
+    \item Secciones en Top 15\% por Score: 4.937
+    \item Secciones asignadas a clusters: 2.624
+    \item Secciones clasificadas como ruido: 844
+\end{itemize}
+
+\section{Anexo B: Pipeline de Procesamiento}
+\label{anexo:pipeline}
+
+El proyecto se estructura en scripts Python ejecutados secuencialmente:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Pipeline de Scripts del Algoritmo L-SOMA}
+\label{tab:pipeline}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Script} & \textbf{Función} \\
+\midrule
+07\_definicion\_target\_v3.py & Genera el vector objetivo $\ket{Q}$ (42 dimensiones) \\
+08\_generador\_matriz\_P\_v2.py & Construye matriz demográfica $\mathbf{P}$ (32.910 $\times$ 42) \\
+09\_auditoria\_matriz.py & Valida estructura, masa y normalización \\
+10\_calculo\_resonancia.py & Calcula JSD para 32.910 secciones \\
+11\_ingesta\_renta\_v2.py & Integra datos económicos (renta hogar) \\
+12\_feature\_engineering\_hijas.py & Calcula ratios hijas/abuelas y presión cuidados \\
+13\_preparacion\_geoespacial.py & Añade coordenadas LAT/LON \\
+14\_clustering\_demanda.py & Ejecuta DBSCAN ($\varepsilon$=1,5km, min=3) \\
+15\_calculo\_masa\_critica.py & Evalúa viabilidad por cluster \\
+19\_informe\_final\_corregido.py & Genera resultados auditados \\
+expansion\_1000\_residencias.py & Algoritmo de expansión adaptativa (71 iteraciones) \\
+validacion\_competencia\_V4.py & Análisis de competencia vía Google Places API \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Anexo C: Parámetros del Modelo}
+\label{anexo:parametros}
+
+\subsection{Parámetros Fijos (No Modificados)}
+
+\begin{itemize}
+    \item \textbf{Radio DBSCAN ($\varepsilon$):} 1,5 km (haversine)
+    \item \textbf{Mínimo secciones por cluster:} 3
+    \item \textbf{Columnas target (Vector Q):} M\_80-84, M\_85-89, M\_90-94, M\_95-99, M\_100+
+    \item \textbf{Umbral renta solvencia:} 30.000 \euro{}/año
+\end{itemize}
+
+\subsection{Parámetros Variables (Escenarios)}
+
+\begin{table}[H]
+\centering
+\caption{Espacio de Parámetros Explorado}
+\label{tab:parametros_variables}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Parámetro} & \textbf{Prime} & \textbf{Expandido} & \textbf{Rango} \\
+\midrule
+Percentil Score & 85 & 60 & 60--85 \\
+Market Share ($\phi$) & 3,0\% & 6,0\% & 1,5\%--6,0\% \\
+Penalización Renta & 0,40 & 0,70 & 0,40--0,70 \\
+Camas Mínimas & 85 & 60 & 60--85 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Código: Divergencia Jensen-Shannon}
+
+\begin{lstlisting}[caption={Cálculo de resonancia demográfica}]
+from scipy.spatial.distance import jensenshannon
+import numpy as np
+
+# vector_Q: probabilidades target (42 dims)
+# matriz_P_np: PDFs por seccion (32910 x 42)
+
+distancias = np.apply_along_axis(
+    lambda row: jensenshannon(row, vector_Q), 
+    axis=1, 
+    arr=matriz_P_np
+)
+resonancias = 1.0 - distancias
+\end{lstlisting}
+
+\subsection{Código: Clustering DBSCAN Geodésico}
+
+\begin{lstlisting}[caption={Configuración de DBSCAN}]
+from sklearn.cluster import DBSCAN
+
+RADIO_KM = 1.5
+MIN_SECCIONES = 3
+
+coords_rad = np.radians(df[['LATITUD', 'LONGITUD']])
+epsilon = RADIO_KM / 6371.0  # radianes
+
+db = DBSCAN(
+    eps=epsilon, 
+    min_samples=MIN_SECCIONES, 
+    metric='haversine',
+    algorithm='ball_tree'
+)
+df['Cluster_ID'] = db.fit_predict(coords_rad)
+\end{lstlisting}
+
+\section{Anexo D: Validación de Competencia}
+\label{anexo:competencia}
+
+\subsection{Configuración de Google Places API}
+
+\begin{table}[H]
+\centering
+\caption{Parámetros de la API de Competencia}
+\label{tab:api_competencia}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parámetro} & \textbf{Valor} \\
+\midrule
+Endpoint & places.googleapis.com/v1/places:searchText \\
+Radio de búsqueda & 1.500 metros \\
+Máximo resultados & 20 por cluster \\
+Query & ``Residencia de ancianos OR Geriátrico'' \\
+Camas estimadas/competidor & 75 (media IMSERSO) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Filtros de Calidad Aplicados}
+
+Para evitar falsos positivos, se implementaron dos filtros:
+
+\textbf{1. Blacklist (descarte por nombre):}
+\begin{itemize}
+    \item farmacia, ortopedia, gimnasio, club, asociación, parking, ayuntamiento
+\end{itemize}
+
+\textbf{2. Whitelist (validación positiva):}
+\begin{itemize}
+    \item \textbf{Por tipo Google:} nursing\_home, assisted\_living\_complex, health
+    \item \textbf{Por nombre:} residencia, geriátrico, mayores, tercera edad
+\end{itemize}
+
+\subsection{Archivos Generados}
+
+\begin{itemize}
+    \item \texttt{clusters\_359\_validado\_FINAL.csv}: 91 clusters con métricas de competencia
+    \item Columnas añadidas: Num\_Competidores, Rivales\_Cercanos, Distancia\_Media, Indice\_Saturacion, Tipo\_Oceano
+\end{itemize}
+
+
+% =============================================================================
+% BIBLIOGRAFÍA
+% =============================================================================
+
+\begin{thebibliography}{99}
+
+\bibitem{ine_censo}
+Instituto Nacional de Estadística.
+\textit{Censo de Población y Viviendas 2021}.
+INE, Madrid, 2023.
+
+\bibitem{ine_renta}
+Instituto Nacional de Estadística.
+\textit{Atlas de Distribución de Renta de los Hogares}.
+INE, Madrid, 2023.
+
+\bibitem{jensen_shannon}
+Lin, J. (1991).
+Divergence measures based on the Shannon entropy.
+\textit{IEEE Transactions on Information Theory}, 37(1), 145-151.
+
+\bibitem{dbscan}
+Ester, M., Kriegel, H. P., Sander, J., \& Xu, X. (1996).
+A density-based algorithm for discovering clusters.
+\textit{Proceedings of KDD-96}, 226-231.
+
+\bibitem{csic_cuidadores}
+CSIC - Enred.
+\textit{¿Quién cuida a quién? La disponibilidad de cuidadores informales}.
+\url{http://envejecimiento.csic.es/documentos/documentos/enred-info20-quiencuida.pdf}
+
+\bibitem{csic_perfil2022}
+Envejecimiento en Red.
+\textit{Informe 2022: El perfil de las personas mayores en España}.
+\url{https://envejecimientoenred.github.io/informe_perfil_mayores_2022_social_4_4/}
+
+\bibitem{murcia_esperanza}
+Murcia Salud.
+\textit{El aumento de la esperanza de vida retrasa la edad de ingreso en residencias}.
+\url{https://www.murciasalud.es/-/el-aumento-de-la-esperanza-de-vida-retrasa-la-edad-de-ingreso-de-los-mayores-en-residencias}
+
+\bibitem{ine_hogares}
+INE.
+\textit{Encuesta Continua de Hogares - Últimos datos}.
+\url{https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C\&cid=1254736176952}
+
+\bibitem{burnout_cuidador}
+Matas Pino, A.
+\textit{Las consecuencias del síndrome de burnout en cuidadores familiares}.
+Universidad Pontificia Comillas, TFG, 2024.
+
+\bibitem{sanitas_burnout}
+Sanitas.
+\textit{Síndrome del cuidador quemado: qué es, causas y soluciones}.
+\url{https://www.sanitas.es/biblioteca-de-salud/tercera-edad/habitos-vida-saludable/sindrome-del-cuidador-quemado}
+
+\bibitem{csic_protocolo}
+CSIC.
+\textit{Protocolo de ingreso en centros residenciales}.
+\url{http://envejecimiento.csic.es/documentos/documentos/chs-jornadas2003-01.pdf}
+
+\bibitem{ballesol_sindromes}
+Ballesol.
+\textit{Los síndromes geriátricos y la salud}.
+\url{https://ballesol.es/sindromes-geriatricos/}
+
+\bibitem{valdeluz_elegir}
+Valdeluz.
+\textit{¿Cómo elegir residencia de mayores? 10 factores a considerar}.
+\url{https://www.valdeluz.com/noticias/como-elegir-residencia-mayores/}
+
+\bibitem{ub_barreras}
+Universidad de Barcelona.
+\textit{Las barreras arquitectónicas y las personas mayores}.
+\textit{Scripta Nova}, Vol. X, núm. 218 (104).
+
+\bibitem{madrid_ascensor}
+Comunidad de Madrid.
+\textit{Edificios destinados a viviendas con accesibilidad y sin ascensor}.
+Portal de datos abiertos, 2024.
+
+\bibitem{inforesidencias_precios}
+Inforesidencias.
+\textit{Informe de precios 2025 de las residencias de mayores de España}.
+\url{https://www.inforesidencias.com/contenidos/noticias/nacional/informe-de-precios-del-2025}
+
+\bibitem{emera_requisitos}
+Grupo Emera.
+\textit{Requisitos para ingresar en una residencia de mayores}.
+\url{https://emera-group.es/noticias/requisitos-para-ingresar-en-una-residencia-de-mayores/}
+
+\bibitem{residenciatura}
+Residenciatura.
+\textit{Cuidar de un familiar mayor: ¿ha llegado el momento de pensar en una residencia?}
+\url{https://www.residenciatura.org/es/article/cuidar-familiar-mayor-ha-llegado-momento-pensar-residencia}
+
+\bibitem{sanitas_culpa}
+Sanitas.
+\textit{Cuidado de seres queridos: ¿cómo gestionar el sentimiento de culpa?}
+\url{https://www.sanitas.es/biblioteca-de-salud/tercera-edad/hogar/cuidar-con-culpa-una-mala-combinacion}
+
+\bibitem{minut_coliving}
+Minut.
+\textit{Coliving senior España: guía completa del modelo para mayores}.
+\url{https://www.minut.com/es/blog/coliving-senior-espana}
+
+\bibitem{culmia_senior}
+Culmia.
+\textit{Senior Living: Nuevo modelo de viviendas para la tercera edad}.
+\url{https://www.culmia.com/es/blog/senior-living-modelo-de-viviendas-tercera-edad/}
+
+\bibitem{sanitas_ventajas}
+Sanitas.
+\textit{10 principales ventajas de vivir en una residencia de mayores}.
+\url{https://www.sanitas.es/biblioteca-de-salud/tercera-edad/hogar/diez-ventajas-de-vivir-en-una-residencia-de-ancianos}
+
+\bibitem{ballesol_orientacion}
+Ballesol.
+\textit{Información y Orientación para familias}.
+\url{https://ballesol.es/informacion-y-orientacion/}
+
+\bibitem{nogales_cercania}
+Los Nogales.
+\textit{La cercanía, un factor clave en la elección del mejor entorno}.
+\url{https://los-nogales.es/cercania-de-la-residencia-de-ancianos-un-factor-clave/}
+
+\bibitem{resimas_cercania}
+Resimas.
+\textit{Las 10 ventajas de escoger una residencia de mayores cerca de casa}.
+\url{https://resimas.com/las-10-ventajas-de-escoger-una-residencia-de-mayores-cerca-de-casa/}
+
+\end{thebibliography}
+
+\end{document}
