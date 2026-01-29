@@ -61,7 +61,27 @@ Using DBSCAN, we aggregated resonance points into functional urban clusters. The
   <img src="assets/barras_top10_clusters.png" width="80%" alt="Top 10 Clusters">
 </p>
 
-## 5. Results: The Reality Frontier
+## 5. Advanced Optimization & Validation
+
+### Adaptive Expansion Algorithm
+The system performs a **Multi-Objective Iterative Search (71 iterations)**, relaxing risk parameters (occupancy thresholds and local competition) to find the structural limit of the market. Proving that demand is not infinite, the **Curve of Convergence** (Equation 9) shows how marginal returns diminish rapidly after the 359th cluster.
+
+<p align="center">
+  <img src="assets/expansion_convergencia.png" width="80%" alt="Curve of Convergence">
+</p>
+
+### Market Saturation Analysis
+We cross-reference demographic demand with **Real-Time Supply Data** (Google Places API).
+*   **Saturation Index ($S_i$)**: Calculated for every viable cluster.
+*   **Result**: 82.4% of theoretically viable locations were discarded due to high competitor density ($S_i > 0.8$).
+
+### The "Blue Ocean" Insight
+After filtering for saturation, the model identified **3 Premium Zones** with high demand ($D_{JS} < 0.1$) and low competition:
+1.  **Madrid Centro**: High purchasing power, vertical aging.
+2.  **Bilbao & Greater Basque Country**: High pension income, cultural fit.
+3.  **Málaga Costa**: International retirees, premium segment.
+
+## 6. Results: The Reality Frontier
 
 The data proves that the market has a "hard limit". The graph below (Figure 4 from the report) demonstrates the **Curve of Diminishing Returns**. After the 359th cluster, the quality of the location drops below the operational safety threshold.
 
