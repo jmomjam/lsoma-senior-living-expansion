@@ -30,6 +30,7 @@ env/
 *.fdb_latexmk
 *.synctex.gz
 *.pdf
+!docs/*.pdf
 
 # Generated Maps/Figures
 *.html
