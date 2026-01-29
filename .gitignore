@@ -45,3 +45,6 @@ scripts/16_mapa_raw.py
 scripts/07_definicion_target_v2.py
 scripts/11_ingesta_renta.py
 scripts/11_ingesta_renta_v2.py
+
+# Private
+cv/
