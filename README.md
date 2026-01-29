@@ -1,63 +1,74 @@
-# L-SOMA: Location-Strategy Optimization & Market Analysis
+# L-SOMA: Location-Selection Optimization for Managed Aging
 
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
 ![Platform](https://img.shields.io/badge/Platform-M2%20Silicon%20Optimized-orange?style=for-the-badge&logo=apple)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-## Abstract
-**L-SOMA** is a Decision Support System (DSS) designed to optimize the expansion strategy of senior living networks. Moving beyond simple demographic density maps, this project applies **Quantum-inspired clustering vectors** and **Real-time Competitive Intelligence** to identify *Blue Ocean* opportunities in the Spanish market.
+## 1. Motivation: The First-Principles Approach
 
-The system processes over **32,000 census sections**, evaluating them against a distinct 19-dimensional demographic target vector ($|\psi\rangle_{target}$) to maximize market resonance while minimizing competitive friction.
+This project addresses a critical complex system optimization problem: **Where to locate 1,000 new senior living units in a stochastic demographic landscape while ensuring a break-even occupancy rate >85%?**
 
-<p align="center">
-  <img src="assets/mapa_clusters_espana.png" width="80%" alt="National Cluster Map">
-</p>
+Conventional expansion strategies rely on scalar metrics (e.g., "population > 65"). We hypothesize that **demand is not scalar, but vector-based**. The "Resonance" of a location depends on the structural shape of the aging pyramid ($|\psi\rangle$), latent variables such as caregiver burnout, and architectural determinism (accessibility of housing stock).
 
-## Mathematical Foundation
-The core of the targeting algorithm relies on minimizing the divergence between the *Ideal Demographics Vector* ($Q$) and the *Candidate Section Vector* ($P$). We define the "Demographic State" of a census section as a normalized probability vector in a 19-dimensional Hilbert Space (representing age buckets):
+Our goal is not just to find "elderly populations", but to solve for the **Global Maxima of Demographic Resonance** in the Spanish territory.
 
-$$ |\psi\rangle = \sum_{i=0}^{19} w_i |age\_bin_i\rangle $$
+## 2. Executive Summary
 
-Where $w_i$ represents the weighted resonance of age group $i$. The suitability of a location is determined by the **Jensen-Shannon Divergence ($D_{JS}$)**, which offers a symmetric and smoothed metric superior to standard Kullback-Leibler divergence for demographic distributions:
+**The Problem**: The senior living market in Spain is fragmented. Organic growth is insufficient to meet the projected deficit. The challenge is to identify locations that maximize both social impact (coverage of need) and operational viability (financial sustainability).
+
+**The Method**: We implemented a **Quantum-inspired Decision Support System (DSS)**. It evaluates 32,000+ census sections using **Jensen-Shannon Divergence ($D_{JS}$)** to measure the similarity between a section's demographic vector and an "Ideal Target Vector". This was combined with **DBSCAN clustering** to aggregate continuous urban fabrics and **Real-Time Competitive Auditing** via Google Places API to filter out saturated markets.
+
+**The Conclusion**: The target of opening 1,000 new units organically is **unattainable**. The analysis reveals the Spanish market saturates between **64 (Prime Model)** and **359 (Expanded Model)** viable units. Beyond this point, marginal returns degrade by 95%.
+
+> [!TIP]
+> **Strategic Recommendation**: The expansion strategy must pivot from pure organic growth to **M&A (Mergers & Acquisitions)** to bridge the gap of ~640 units.
+>
+> [📄 **Download Full Technical Report (PDF)**](docs/informe_lsoma.pdf)
+
+## 3. Mathematical Foundation
+
+We define the state of a census section $P$ as a probability distribution in a Hilbert Space of 19 age dimensions. Optimal locations minimize the divergence from the Ideal Target Vector $Q$.
+
+We utilize the **Jensen-Shannon Divergence**, a smoothed and symmetric version of Kullback-Leibler divergence, to quantify this "demographic distance":
 
 $$ D_{JS}(P || Q) = \frac{1}{2} D_{KL}(P || M) + \frac{1}{2} D_{KL}(Q || M) $$
 
 $$ \text{where } M = \frac{1}{2}(P + Q) $$
 
-This mathematical rigor ensures that we identify areas not just with "old people", but with the *specific structural aging profile* that maximizes occupancy rates and operational efficiency.
+This metric is robust against zero-probability events (empty age bins) and provides a bounded score $[0, 1]$ used to rank every square kilometer of the country.
 
-## Key Visualizations
+## 4. Key Visualizations
 
-### The Resonance Matrix
-The heatmap below illustrates the "Target Vector Q" detection across the national territory, highlighting areas of high demographic resonance.
-
-<p align="center">
-  <img src="assets/matriz_p_heatmap.png" width="70%" alt="Resonance Matrix">
-</p>
-
-### Strategic Clusters (Top 10)
-Identified clusters ranked by projected ROI and operational viability (min 85 beds).
+### The Demographic Resonance Matrix
+The heatmap below visualizes the $D_{JS}$ score across the national territory. Hotspots indicate areas where the local demographic structure resonates perfectly with the business model.
 
 <p align="center">
-  <img src="assets/barras_top10_clusters.png" width="70%" alt="Top 10 Clusters">
+  <img src="assets/matriz_p_heatmap.png" width="80%" alt="Resonance Matrix">
 </p>
 
-## Methodology & Pipeline
+### Strategic Clusters (Blue Oceans)
+Using DBSCAN, we aggregated resonance points into functional urban clusters. The bar chart below shows the **Top 10 Prime Clusters**, ranked by theoretical capacity (bed count).
 
-The project implements a rigorous data science pipeline:
+<p align="center">
+  <img src="assets/barras_top10_clusters.png" width="80%" alt="Top 10 Clusters">
+</p>
 
-1.  **Data Ingestion (`scripts/00-11`)**: ETL pipelines for Census (INE), Cadastre, and Household Income data.
-2.  **Target Vector Definition (`scripts/07`)**: Construction of the mathematical target vector based on business logic (see `config.yaml`).
-3.  **Geo-Clustering (`scripts/14`)**: DBSCAN spatial clustering using Haversine metric to identify continuous urban fabrics.
-4.  **Viability Calculation (`scripts/15`)**: Assessment of Critical Mass satisfying the $N_{beds} \ge 85$ constraint.
-5.  **Competitive Audit (`scripts/VALIDACION_COMPETENCIA`)**: Real-time validation of competitors via **Google Places API**, filtered for false positives.
+## 5. Results: The Reality Frontier
+
+The data proves that the market has a "hard limit". The graph below (Figure 4 from the report) demonstrates the **Curve of Diminishing Returns**. After the 359th cluster, the quality of the location drops below the operational safety threshold.
+
+### Identified Blue Oceans ($Saturation < 0.2$)
+The algorithm highlighted three primary zones with high demand and minimal competition:
+1.  **Madrid Centro** (High purchasing power, vertical aging)
+2.  **Bilbao & Greater Basque Country** (High pension income, cultural fit)
+3.  **Málaga Costa** (International retirees, premium segment)
 
 ## Project Structure
 ```bash
-├── assets/                 # Visualization artifacts
+├── assets/                 # Visualization artifacts (Maps, Heatmaps)
 ├── config.yaml             # Centralized System Configuration
+├── docs/                   # Technical Reports (PDF)
 ├── datos/                  # Data (GitIgnored for privacy/size)
-├── informe/                # LaTeX Scientific Reports
 ├── scripts/                # Production Pipeline
 │   ├── 00_bot_descarga.py  # Automated Data Ingestion
 │   ├── 14_clustering_demanda.py # DBSCAN Algorithm
@@ -65,21 +76,13 @@ The project implements a rigorous data science pipeline:
 └── requirements.txt        # Reproducibility Environment
 ```
 
-## Requirements
-- Python 3.9+ (Tested on 3.11 M2 Silicon)
-- Libraries: `pandas`, `scikit-learn` (DBSCAN), `folium`, `requests`
-- Google Cloud API Key (Places API)
+## Requirements & Usage
+The system is governed by `config.yaml`. To reproduce the analysis:
 
-## Configuration
-The system is governed by `config.yaml`, separating logic from parameters:
-
-```yaml
-business:
-  market_share_target: 0.03
-  min_operational_beds: 85
-competition:
-  search_radius_meters: 1500
-```
+1.  Clone the repo: `git clone https://github.com/jmomjam/lsoma-senior-living-expansion.git`
+2.  Install requirements: `pip install -r requirements.txt`
+3.  Set your `GOOGLE_API_KEY` in `.env`.
+4.  Run the pipeline scripts.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
