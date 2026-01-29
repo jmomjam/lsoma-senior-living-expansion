@@ -16,6 +16,9 @@ Our goal is not just to find "elderly populations", but to solve for the **Globa
 > **Research Basis**: This entire study is founded on the findings of the paper *Disparadores de Ingreso a Residencias Privadas*. The variables selected for the resonance vector derived directly from this clinical research.
 > [📄 **Read Original Research (PDF)**](docs/Disparadores%20de%20Ingreso%20a%20Residencias%20Privadas.pdf)
 
+> [!NOTE]
+> **Technical Documentation**: For a detailed breakdown of the 71-iteration expansion algorithm, complete mathematical proofs, and sensitivity analysis, please refer to the **[Full Technical Report (PDF)](docs/informe_lsoma.pdf)** included in this repository.
+
 ## 2. Data Sources & Scope
 
 * **Geographic Scope**: National-scale study of **Spain**, covering all **32,910 census sections**.
@@ -34,9 +37,7 @@ Our goal is not just to find "elderly populations", but to solve for the **Globa
 
 **Strategic Recommendation**: The expansion strategy must pivot from pure organic growth to **M&A (Mergers & Acquisitions)** to bridge the gap of ~640 units.
 
----
-**Technical Documentation**: For a detailed breakdown of the 71-iteration expansion algorithm, complete mathematical proofs, and sensitivity analysis, please refer to the **[Full Technical Report (PDF)](docs/informe_lsoma.pdf)** included in this repository.
----
+
 
 ## 3. Mathematical Foundation
 
