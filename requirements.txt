@@ -3,3 +3,4 @@ requests
 python-dotenv
 folium
 openpyxl
+PyYAML

@@ -12,15 +12,17 @@ Objetivo:
 """
 
 import pandas as pd
-import requests
-import time
-import math
 import os
+import yaml
 from datetime import datetime
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
 load_dotenv()
+
+# Cargar Configuración Centralizada
+with open("../config.yaml", "r") as f:
+    config = yaml.safe_load(f)
 
 # ==============================================================================
 # CONFIGURACIÓN
@@ -30,8 +32,10 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 INPUT_FILE = "../datos/expansion_clusters_final.csv"
 OUTPUT_FILE = "../datos/clusters_359_validado_FINAL.csv"
 
-RADIO_BUSQUEDA_METROS = 1500
-CAMAS_POR_COMPETIDOR = 80 
+# Parámetros desde config.yaml
+RADIO_BUSQUEDA_METROS = config['competition']['search_radius_meters']
+CAMAS_POR_COMPETIDOR = config['competition']['beds_per_competitor_estimate']
+ 
 QUERY_TEXTO = "Residencia de ancianos OR Geriátrico" # Query limpia
 PLACES_URL = "https://places.googleapis.com/v1/places:searchText"
 
