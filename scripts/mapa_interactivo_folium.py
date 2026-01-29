@@ -30,7 +30,7 @@ RANKING_FASE8 = "../datos/ranking_fase8_puntos_con_cluster.csv"
 # Datos para Frontera/Competencia (IDs nuevos)
 FRONTERA_COMPETENCIA = "../datos/secciones_frontera_competencia.csv"
 
-OUTPUT_FILE = "../informe/mapa_interactivo_lsoma.html"
+OUTPUT_FILE = "../reports/mapa_interactivo_lsoma.html"
 
 # Colores
 COLORES_OCEANO = {

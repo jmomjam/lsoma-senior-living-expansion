@@ -34,6 +34,7 @@ env/
 # Generated Maps/Figures
 *.html
 *.png
+!assets/*.png
 
 # Ignored Scripts (Primitive/Obsolete)
 scripts/02_ver_todo.py

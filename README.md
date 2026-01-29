@@ -12,7 +12,15 @@ Conventional expansion strategies rely on scalar metrics (e.g., "population > 65
 
 Our goal is not just to find "elderly populations", but to solve for the **Global Maxima of Demographic Resonance** in the Spanish territory.
 
-## 2. Executive Summary
+## 2. Data Sources & Scope
+
+* **Geographic Scope**: National-scale study of **Spain**, covering all **32,910 census sections**.
+* **Primary Sources (INE - Instituto Nacional de Estadística)**:
+    * **Demographics**: Spanish Census 2021-2025 (Gender and age distribution by 5-year bins).
+    * **Economics**: Household Income Distribution Atlas 2023 (Average net income per household).
+    * **Cartography**: 2024 Census Section Polygons (CUSEC) for spatial clustering.
+
+## 3. Executive Summary
 
 **The Problem**: The senior living market in Spain is fragmented. Organic growth is insufficient to meet the projected deficit. The challenge is to identify locations that maximize both social impact (coverage of need) and operational viability (financial sustainability).
 
@@ -79,7 +87,7 @@ The algorithm highlighted three primary zones with high demand and minimal compe
 ## Requirements & Usage
 The system is governed by `config.yaml`. To reproduce the analysis:
 
-1.  Clone the repo: `git clone https://github.com/jmomjam/lsoma-senior-living-expansion.git`
+1.  Clone the repo: `git clone https://github.com/jmomjam/senior-care-location-optimization-spain.git`
 2.  Install requirements: `pip install -r requirements.txt`
 3.  Set your `GOOGLE_API_KEY` in `.env`.
 4.  Run the pipeline scripts.
