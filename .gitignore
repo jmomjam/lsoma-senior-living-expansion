@@ -34,3 +34,12 @@ env/
 # Generated Maps/Figures
 *.html
 *.png
+
+# Ignored Scripts (Primitive/Obsolete)
+scripts/02_ver_todo.py
+scripts/03_inspector_gigante.py
+scripts/13_diagnostico_geo.py
+scripts/16_mapa_raw.py
+scripts/07_definicion_target_v2.py
+scripts/11_ingesta_renta.py
+scripts/11_ingesta_renta_v2.py
