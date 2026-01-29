@@ -74,6 +74,13 @@ The system performs a **Multi-Objective Iterative Search (71 iterations)**, rela
   <img src="assets/expansion_convergencia.png" width="80%" alt="Curve of Convergence">
 </p>
 
+### Distribution of Expanded Clusters (Post-Optimization)
+The map below illustrates the **91 viable clusters** identified after relaxing parameters (Iter. 71). Note the expanded geographic coverage compared to the initial Prime model, though quality trade-offs apply.
+
+<p align="center">
+  <img src="assets/expansion_mapa_clusters.png" width="80%" alt="Expanded Model Map">
+</p>
+
 ### Market Saturation Analysis
 We cross-reference demographic demand with **Real-Time Supply Data** (Google Places API).
 *   **Saturation Index ($S_i$)**: Calculated for every viable cluster.
