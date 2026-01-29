@@ -12,6 +12,10 @@ Conventional expansion strategies rely on scalar metrics (e.g., "population > 65
 
 Our goal is not just to find "elderly populations", but to solve for the **Global Maxima of Demographic Resonance** in the Spanish territory.
 
+> [!NOTE]
+> **Research Basis**: This entire study is founded on the findings of the paper *Disparadores de Ingreso a Residencias Privadas*. The variables selected for the resonance vector derived directly from this clinical research.
+> [📄 **Read Original Research (PDF)**](docs/Disparadores%20de%20Ingreso%20a%20Residencias%20Privadas.pdf)
+
 ## 2. Data Sources & Scope
 
 * **Geographic Scope**: National-scale study of **Spain**, covering all **32,910 census sections**.
