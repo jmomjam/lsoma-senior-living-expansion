@@ -32,10 +32,11 @@ Our goal is not just to find "elderly populations", but to solve for the **Globa
 
 **The Conclusion**: The target of opening 1,000 new units organically is **unattainable**. The analysis reveals the Spanish market saturates between **64 (Prime Model)** and **359 (Expanded Model)** viable units. Beyond this point, marginal returns degrade by 95%.
 
-> [!TIP]
-> **Strategic Recommendation**: The expansion strategy must pivot from pure organic growth to **M&A (Mergers & Acquisitions)** to bridge the gap of ~640 units.
->
-> [📄 **Download Full Technical Report (PDF)**](docs/informe_lsoma.pdf)
+**Strategic Recommendation**: The expansion strategy must pivot from pure organic growth to **M&A (Mergers & Acquisitions)** to bridge the gap of ~640 units.
+
+---
+**Technical Documentation**: For a detailed breakdown of the 71-iteration expansion algorithm, complete mathematical proofs, and sensitivity analysis, please refer to the **[Full Technical Report (PDF)](docs/informe_lsoma.pdf)** included in this repository.
+---
 
 ## 3. Mathematical Foundation
 
