@@ -1,0 +1,40 @@
+# ==============================================================================
+# L-SOMA PROJECT CHECKLIST & CONFIGURATION
+# ==============================================================================
+
+# 1. DEMOGRAPHIC TARGETING (Vector Q)
+# ------------------------------------------------------------------------------
+# Weights assigned to age groups to calculate the "Resonance Score" of a section.
+demographics:
+  weights:
+    "0-59": 0.15     # Base population (workforce)
+    "60-74": 0.50    # Transitional group
+    "75-79": 1.00    # Early frailty
+    "80-84": 4.00    # Core target
+    "85+": 5.00      # High dependency (Maximum resonance)
+  
+  feminization_factor: 1.3  # Weight multiplier for female population (higher longevity/solitude)
+
+# 2. BUSINESS CONSTRAINTS & VIABILITY
+# ------------------------------------------------------------------------------
+business:
+  market_share_target: 0.03 # We expect to capture 3% of the total addressable market
+  min_operational_beds: 85  # Minimum beds required for profitable operation (Break-even)
+  
+# 3. COMPETITIVE INTELLIGENCE (Google Places API)
+# ------------------------------------------------------------------------------
+competition:
+  search_radius_meters: 1500
+  beds_per_competitor_estimate: 80
+  saturation_thresholds:
+    blue_ocean: 0.20  # Saturation index < 0.2 is ideal
+    battlefield: 1.0  # Saturation index < 1.0 is competitive
+    saturated: 1.0+   # Avoid
+
+# 4. GEO-CLUSTERING (DBSCAN)
+# ------------------------------------------------------------------------------
+clustering:
+  algorithm: "DBSCAN"
+  epsilon_km: 1.5     # Neighborhood radius
+  min_samples: 3      # Min sections to form a core cluster
+  metric: "haversine"
